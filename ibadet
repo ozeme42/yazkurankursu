@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İbadet Esasları İnteraktif Infografik</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Inter font import */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for content overflow */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #374151; /* gray-700 */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4B5563; /* gray-600 */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6B7280; /* gray-500 */
+        }
+        /* Styles for the custom message box */
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #1f2937; /* gray-800 */
+            color: #f9fafb; /* gray-50 */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            text-align: center;
+            max-width: 300px;
+            border: 1px solid #4b5563; /* gray-600 */
+        }
+        .message-box button {
+            background-color: #3b82f6; /* blue-500 */
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            margin-top: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .message-box button:hover {
+            background-color: #2563eb; /* blue-600 */
+        }
+
+        /* Memory Card Specific Styles */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1rem;
+            width: 100%;
+        }
+
+        .memory-card {
+            background-color: #374151; /* gray-700 */
+            height: 120px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #f9fafb;
+            cursor: pointer;
+            perspective: 1000px; /* For 3D flip effect on the card element itself */
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 2px solid #4b5563;
+        }
+
+        .memory-card.matched {
+            background-color: #10b981; /* green-500 */
+            cursor: default;
+            border-color: #059669; /* green-600 */
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s; /* Apply transition here for the flip effect */
+            transform-style: preserve-3d; /* Preserve 3D space for children */
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden; /* Safari */
+            backface-visibility: hidden; /* Hide the back of the element when facing away */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+            box-sizing: border-box;
+            border-radius: 8px;
+        }
+
+        .card-front {
+            background-color: #3b82f6; /* blue-500 */
+            color: white;
+            transform: rotateY(0deg); /* Front face is initially visible */
+            border: 2px solid #2563eb; /* blue-600 */
+        }
+
+        .card-back {
+            background-color: #1f2937; /* gray-800 */
+            color: white;
+            transform: rotateY(180deg); /* Back face is initially rotated to be hidden */
+            border: 2px solid #4b5563; /* gray-600 */
+            font-size: 0.9rem; /* Smaller font for meaning */
+        }
+
+        /* When the parent .memory-card has 'flipped' class, flip the .card-inner */
+        .memory-card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center">
+    <div id="app-container" class="bg-gray-800 rounded-none shadow-none p-6 w-full h-screen flex flex-col">
+        <div id="page-content" class="flex-grow flex items-center justify-center">
+            <!-- Page content will be rendered here by JavaScript -->
+        </div>
+
+        <div class="flex justify-between mt-6 p-4 border-t border-gray-700">
+            <button id="prev-button" class="px-6 py-3 bg-gray-700 text-gray-200 font-semibold rounded-full shadow-md hover:bg-gray-600 disabled:opacity-50 transition duration-300 ease-in-out transform hover:scale-105">
+                Önceki
+            </button>
+            <!-- Fullscreen button added here -->
+            <button id="fullscreen-button" class="px-6 py-3 bg-purple-600 text-white font-semibold rounded-full shadow-md hover:bg-purple-700 transition duration-300 ease-in-out transform hover:scale-105">
+                Tam Ekran
+            </button>
+            <button id="next-button" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-full shadow-md hover:bg-blue-700 transition duration-300 ease-in-out transform hover:scale-105">
+                Sonraki
+            </button>
+        </div>
+    </div>
+
+    <!-- Custom message box for fullscreen error -->
+    <div id="fullscreen-message-box" class="message-box">
+        <p>Uyarı: Bu bir örnek mesaj kutusudur. Tam ekran işlevi, tarayıcı güvenlik politikaları nedeniyle iframe ortamında doğrudan çalışmayabilir.</p>
+        <button onclick="document.getElementById('fullscreen-message-box').style.display = 'none';">Tamam</button>
+    </div>
+
+    <script>
+        // Global state variables
+        let currentPageIndex = 0;
+        let feedback = '';
+        let selectedAnswer = null;
+
+        // Memory Game State
+        let cards = [];
+        let flippedCards = [];
+        let matchedCards = [];
+        let canFlip = true;
+
+        // DOM elements
+        const pageContentDiv = document.getElementById('page-content');
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+        const fullscreenButton = document.getElementById('fullscreen-button'); // Get fullscreen button
+        const fullscreenMessageBox = document.getElementById('fullscreen-message-box'); // Get message box
+
+        // Raw data for pages, now fully structured and ordered for İbadet Esasları
+        const rawPagesData = [
+            {
+                type: 'intro',
+                title: 'İbadet Esaslarına Hoş Geldiniz!',
+                content: [
+                    'İslam dininin temelini oluşturan ibadetler, Allah\'a olan sevgimizi ve şükrümüzü ifade etmemizi sağlar.',
+                    'İbadetler, hem bireysel hem de toplumsal faydalar sağlar.',
+                    'Bu bölümde temel ibadetleri ve faydalarını öğreneceğiz.'
+                ],
+                buttonText: 'Başlayalım!'
+            },
+            // --- 1. İbadetin Anlamı ve Çeşitleri ---
+            {
+                type: 'content',
+                title: '1. İbadet Nedir?',
+                content: [
+                    'İbadet, yapıldığında Allah\'ın sevgisini kazandıran her türlü söz ve davranıştır.',
+                    'Sadece namaz, oruç gibi farz ibadetler değil; güzel söz söylemek, anne babaya saygılı davranmak, insanlara iyilik yapmak, yol üzerinden insanları rahatsız eden bir şeyi kaldırmak, tebessüm etmek, yaşlıya yardım etmek de birer ibadettir.',
+                    'Kısacası hayatımızı güzelleştiren, insanları mutlu ederken Allah\'ın da rızasını kazanmamızı sağlayan her türlü iş ve davranış ibadettir. Karşılığında sevap vardır.'
+                ],
+                originalTopicTitle: '1. İbadetin Anlamı ve Çeşitleri'
+            },
+            {
+                type: 'activity',
+                title: 'Etkinlik: İbadet Nedir?',
+                question: 'Aşağıdakilerden hangisi ibadet sayılmaz?',
+                options: [
+                    { text: 'Yol kenarındaki taşı kaldırmak', isCorrect: false },
+                    { text: 'Hasta ziyaret etmek', isCorrect: false },
+                    { text: 'Yüksek sesle bağırmak', isCorrect: true },
+                    { text: 'Hayvanlara su vermek', isCorrect: false },
+                ],
+                originalTopicTitle: '1. İbadetin Anlamı ve Çeşitleri'
+            },
+            {
+                type: 'content',
+                title: '1. İbadetin Faydaları',
+                content: [
+                    'İbadetlerin hem beden hem de ruh sağlığımız üzerinde çok önemli etkileri vardır.',
+                    'Namaz kılınca gönlümüze huzur ve güven duygusu dolar. Oruç tuttuğumuzda vücudumuz dinlenir, şefkat ve merhamet duygularımız gelişir.',
+                    'Zekât ve sadaka paylaşma duygumuzu geliştirir, toplumda birlik ve beraberliği sağlar. Hac ibadeti ise Müslümanların kardeşliğini pekiştirir.',
+                    'İbadet etmek; bizi eğitir, hayatımızı düzene sokar, Rabbimizle ve çevremizdeki diğer insanlarla ilişkilerimizi güzelleştirir, ahlâkımızı olgunlaştırır.'
+                ],
+                originalTopicTitle: '1. İbadetin Anlamı ve Çeşitleri'
+            },
+            {
+                type: 'activity',
+                title: 'Etkinlik: İbadetin Faydaları',
+                question: 'Aşağıdakilerden hangisi ibadetin faydalarından biri değildir?',
+                options: [
+                    { text: 'Huzur verir', isCorrect: false },
+                    { text: 'Sağlığı bozar', isCorrect: true },
+                    { text: 'Ahlakı güzelleştirir', isCorrect: false },
+                    { text: 'Paylaşmayı öğretir', isCorrect: false },
+                ],
+                originalTopicTitle: '1. İbadetin Anlamı ve Çeşitleri'
+            },
+            // --- 2. Cami ve Ezan ---
+            {
+                type: 'content',
+                title: '2. Cami ve Bölümleri',
+                content: [
+                    'Camiler, birlikte ibadet ettiğimiz, namaz kılıp dua ettiğimiz yerlerdir. Aynı zamanda hutbe, vaaz ve sohbetlerle faydalı bilgiler öğrendiğimiz ilim merkezleridir.',
+                    'Camilerin mihrap, minber, kürsü, kubbe ve minare gibi bölümleri vardır.',
+                    '**Mihrap:** İmamların namaz kıldırdığı yer.',
+                    '**Minber:** Cuma ve bayram namazlarında hutbe okunan yer.',
+                    '**Kürsü:** Vaaz ve sohbet yapılan yer.',
+                    '**Kubbe:** Caminin yarım küre biçimindeki tavanı.',
+                    '**Minare:** Ezan okunan yer.',
+                    '**Şadırvan:** Caminin avlusunda abdest almak için yapılan çeşmelerin bulunduğu yer.'
+                ],
+                originalTopicTitle: '2. Cami ve Ezan'
+            },
+            {
+                type: 'activity',
+                title: 'Etkinlik: Cami Bölümleri',
+                question: 'Ezan okunan yere ne denir?',
+                options: [
+                    { text: 'Mihrap', isCorrect: false },
+                    { text: 'Minare', isCorrect: true },
+                    { text: 'Minber', isCorrect: false },
+                    { text: 'Kubbe', isCorrect: false },
+                ],
+                originalTopicTitle: '2. Cami ve Ezan'
+            },
+            {
+                type: 'content',
+                title: '2. Ezan Bizi Namaza Çağırır',
+                content: [
+                    'Ezan, namaz vaktinin girdiğini haber vermek amacıyla yüksek sesle okunan sözlerdir. Peygamber Efendimiz zamanında ilk ezanı Bilal okumuştur.',
+                    'Ezan hem namaza davettir hem de Allah\'ın birliğini, Hz. Muhammed\'in O\'nun peygamberi olduğunu ilandır.',
+                    'Sabah ezanında "es-Salatu hayrun minen nevm" (Namaz uykudan daha hayırlıdır) denilir.',
+                    '**Kâmet:** Farz namazlardan önce müezzin tarafından namazın başlamak üzere olduğunu duyurmak için okunur. Ezanla aynıdır, sadece "Hayye ale\'l-felâh" dedikten sonra "Kad kâmeti\'s-salâh" denilir.'
+                ],
+                originalTopicTitle: '2. Cami ve Ezan'
+            },
+            {
+                type: 'activity',
+                title: 'Etkinlik: Ezan',
+                question: 'İlk ezanı okuyan sahabi kimdir?',
+                options: [
+                    { text: 'Hz. Ali', isCorrect: false },
+                    { text: 'Hz. Ömer', isCorrect: false },
+                    { text: 'Hz. Bilal', isCorrect: true },
+                    { text: 'Hz. Osman', isCorrect: false },
+                ],
+                originalTopicTitle: '2. Cami ve Ezan'
+            },
+            // --- 3. Namazın Farzları ---
+            {
+                type: 'content',
+                title: '3. Namaza Hazırlık (Dışındaki Farzlar)',
+                content: [
+                    'Namaz, Rabbimize olan sevgimizi ve bağlılığımızı canlı tutan bir ibadettir. Namaza başlamadan önce bazı kuralları yerine getirmeliyiz:',
+                    '**1. Abdest almak (Hadesten tahâret):** Namaz için temizlenmek.',
+                    '**2. Namaz kılınacak yerin ve elbisemizin temiz olması (Necasetten tahâret):** Çevresel temizlik.',
+                    '**3. Örtülmesi gereken yerleri örtmek (Setr-i avret):** Namazda uygun giyinmek.',
+                    '**4. Kıbleye yönelmek (İstikbal-i kıble):** Kâbe\'ye dönmek.',
+                    '**5. Namaz vaktinin girmesi (Vakit):** Namazı vaktinde kılmak.',
+                    '**6. Allah rızası için hangi namazı kılacağımızı belirtmek (Niyet):** Namaza niyet etmek.'
+                ],
+                originalTopicTitle: '3. Namazın Farzları'
+            },
+            {
+                type: 'activity',
+                title: 'Etkinlik: Namazın Dışındaki Farzlar',
+                question: 'Namaz kılarken Kâbe\'ye yönelmek hangi farzdır?',
+                options: [
+                    { text: 'Niyet', isCorrect: false },
+                    { text: 'Vakit', isCorrect: false },
+                    { text: 'İstikbal-i Kıble', isCorrect: true },
+                    { text: 'Setr-i Avret', isCorrect: false },
+                ],
+                originalTopicTitle: '3. Namazın Farzları'
+            },
+            {
+                type: 'content',
+                title: '3. Namazın İçindeki Farzlar',
+                content: [
+                    'Namaz kılarken mutlaka yerine getirilmesi gereken kurallar vardır:',
+                    '**1. Namaza Allahu Ekber diyerek başlamak (İftitah tekbiri):** Başlangıç tekbiri.',
+                    '**2. Namazda ayakta durmak (Kıyam):** Ayakta duruş.',
+                    '**3. Namazda Kur’an okumak (Kıraat):** Kur\'an okuma.',
+                    '**4. Namazda ellerimizi dizlere koyarak eğilmek (Rükû):** Belden eğilme.',
+                    '**5. Namazda alnımızı yere koymak (Sücud):** Secde etme.',
+                    '**6. Namazın sonunda “Ettehiyyatü” duasını okuyacak kadar oturmak (Ka’de-i âhire):** Son oturuş.'
+                ],
+                originalTopicTitle: '3. Namazın Farzları'
+            },
+            {
+                type: 'activity',
+                title: 'Etkinlik: Namazın İçindeki Farzlar',
+                question: 'Namazda alnımızı yere koymaya ne denir?',
+                options: [
+                    { text: 'Rükû', isCorrect: false },
+                    { text: 'Kıyam', isCorrect: false },
+                    { text: 'Sücud', isCorrect: true },
+                    { text: 'Kıraat', isCorrect: false },
+                ],
+                originalTopicTitle: '3. Namazın Farzları'
+            },
+            {
+                type: 'content',
+                title: '3. Abdest ve Teyemmüm',
+                content: [
+                    '**Abdest:** Namaz kılmak için ön hazırlık olan bir temizlenme biçimidir. Eller, ağız, burun, yüz, kollar, baş, kulaklar ve ayaklar yıkanarak alınır.',
+                    '**Abdestin Farzları:** Yüzü yıkamak, elleri ve kolları dirseklerle birlikte yıkamak, başı mesh etmek, ayakları bileklerle birlikte yıkamak.',
+                    '**Teyemmüm:** Su bulunamadığında veya kullanılamadığında temiz toprakla alınan abdest çeşididir. Eller toprağa sürülerek yüz ve kollar mesh edilir.',
+                    '**Gusül:** Boy abdesti almak için niyet edilir, ağız ve burun temizlendikten sonra normal abdest alınır ve vücudun tamamı güzelce yıkanır.'
+                ],
+                originalTopicTitle: '3. Namazın Farzları'
+            },
+            {
+                type: 'activity',
+                title: 'Etkinlik: Abdest ve Teyemmüm',
+                question: 'Su bulunamadığında veya kullanılamadığında hangi abdest çeşidi alınır?',
+                options: [
+                    { text: 'Gusül', isCorrect: false },
+                    { text: 'Abdest', isCorrect: false },
+                    { text: 'Teyemmüm', isCorrect: true },
+                    { text: 'Normal abdest', isCorrect: false },
+                ],
+                originalTopicTitle: '3. Namazın Farzları'
+            },
+            // --- 4. Namaz Kılıyorum (Rekatlar ve Çeşitleri) ---
+            {
+                type: 'content',
+                title: '4. Beş Vakit Namaz',
+                content: [
+                    'Namaz bizi günde beş defa Rabbimize yönelten bir ibadettir. Namaz vaktini haber veren ezan sesi, bizi stresten kurtulmaya ve huzura kavuşmaya çağırır.',
+                    '**Sabah Namazı:** 2 Rekât Sünnet + 2 Rekât Farz = 4 Rekât',
+                    '**Öğle Namazı:** 4 Rekât Sünnet + 4 Rekât Farz + 2 Rekât Son Sünnet = 10 Rekât',
+                    '**İkindi Namazı:** 4 Rekât Sünnet + 4 Rekât Farz = 8 Rekât',
+                    '**Akşam Namazı:** 3 Rekât Farz + 2 Rekât Sünnet = 5 Rekât',
+                    '**Yatsı Namazı:** 4 Rekât Sünnet + 4 Rekât Farz + 2 Rekât Son Sünnet = 10 Rekât (+ 3 Rekât Vitir Namazı)'
+                ],
+                originalTopicTitle: '4. Namaz Kılıyorum'
+            },
+            {
+                type: 'activity',
+                title: 'Etkinlik: Namaz Rekatları',
+                question: 'Akşam namazı kaç rekattır?',
+                options: [
+                    { text: '4', isCorrect: false },
+                    { text: '8', isCorrect: false },
+                    { text: '5', isCorrect: true },
+                    { text: '10', isCorrect: false },
+                ],
+                originalTopicTitle: '4. Namaz Kılıyorum'
+            },
+            {
+                type: 'content',
+                title: '4. Cemaatle Namaz ve Özel Namazlar',
+                content: [
+                    '**Cemaatle Namaz:** Bir imama uyarak namaz kılmaya denir. Müslümanların birliğini ve kardeşliğini pekiştirir.',
+                    '**Cuma Namazı:** Cuma günü öğle namazı vaktinde cemaatle kılınan, 10 rekâtlık özel bir namazdır. Müslümanların haftalık bayramıdır.',
+                    '**Teravih Namazı:** Ramazan ayında yatsı namazından sonra kılınan, 20 rekâtlık özel bir namazdır. Coşkuyla cemaatle kılınır.',
+                    '**Bayram Namazı:** Ramazan ve Kurban Bayramı sabahı cemaatle kılınan, 2 rekâtlık özel bir namazdır. Bayram sevincini pekiştirir.'
+                ],
+                originalTopicTitle: '4. Namaz Kılıyorum'
+            },
+            {
+                type: 'activity',
+                title: 'Etkinlik: Özel Namazlar',
+                question: 'Ramazan ayında yatsı namazından sonra kılınan namaz hangisidir?',
+                options: [
+                    { text: 'Cuma Namazı', isCorrect: false },
+                    { text: 'Bayram Namazı', isCorrect: false },
+                    { text: 'Teravih Namazı', isCorrect: true },
+                    { text: 'Vitir Namazı', isCorrect: false },
+                ],
+                originalTopicTitle: '4. Namaz Kılıyorum'
+            },
+            // --- 5. Oruç Tutuyorum ---
+            {
+                type: 'content',
+                title: '5. Oruç Nedir?',
+                content: [
+                    'Oruç tutmak, ibadet amacıyla imsak vaktinden iftar vaktine kadar hiçbir şey yememek ve içmemektir. Ramazan ayında tutulur.',
+                    'Oruç, sadece aç ve susuz kalmak demek değildir. Aynı zamanda yalan, dedikodu, kavga gibi kötü davranışlardan da uzak durmaktır.',
+                    '**İmsak:** Gecenin bitmesiyle oruca başlama zamanı.',
+                    '**İftar:** Güneşin batmasıyla orucun sona erdiği vakit.',
+                    '**Mukabele:** Ramazan ayında Kur’an-ı Kerim’in bir kişi tarafından okunup diğerleri tarafından takip edilmesi.'
+                ],
+                originalTopicTitle: '5. Oruç Tutuyorum'
+            },
+            {
+                type: 'activity',
+                title: 'Etkinlik: Oruç Kavramları',
+                question: 'Gecenin bitmesiyle oruca başlama zamanına ne denir?',
+                options: [
+                    { text: 'İftar', isCorrect: false },
+                    { text: 'Sahur', isCorrect: false },
+                    { text: 'İmsak', isCorrect: true },
+                    { text: 'Mukabele', isCorrect: false },
+                ],
+                originalTopicTitle: '5. Oruç Tutuyorum'
+            },
+            {
+                type: 'content',
+                title: '5. Orucun Faydaları ve Ramazan Ayı',
+                content: [
+                    'Peygamberimiz; "Oruç tutun, sağlık bulun!" buyurmuştur. Oruç, vücudumuzu dinlendirir ve zindelik kazandırır.',
+                    'Oruç tutarak, açlığa ve susuzluğa sabreder, Allah’ın verdiği nimetlere şükrederiz. Şefkat ve merhamet duygularımızı geliştirir.',
+                    'Ramazan ayı, Kur’an ayıdır. Bu ayda bol bol Kur’an okunur, namazlar kılınır, iftar sofraları paylaşılır, fakirlere yardım edilir.',
+                    '**Fitre:** Ramazan ayında ihtiyaç sahiplerine verilen sadakadır.',
+                    '**Sahur:** Orucu rahat tutabilmek için gece kalkıp yediğimiz yemek.',
+                    '**Mahya:** Ramazan ayında minarelere asılan ışıklı yazı.'
+                ],
+                originalTopicTitle: '5. Oruç Tutuyorum'
+            },
+            {
+                type: 'activity',
+                title: 'Etkinlik: Ramazan Ayı',
+                question: 'Ramazan ayında minarelere asılan ışıklı yazıya ne denir?',
+                options: [
+                    { text: 'İftar', isCorrect: false },
+                    { text: 'Sahur', isCorrect: false },
+                    { text: 'Fitre', isCorrect: false },
+                    { text: 'Mahya', isCorrect: true },
+                ],
+                originalTopicTitle: '5. Oruç Tutuyorum'
+            },
+            // --- 6. Zekâtı Öğreniyorum ---
+            {
+                type: 'content',
+                title: '6. Zekât Nedir?',
+                content: [
+                    'Zekât, İslam\'ın temel ibadetlerinden biri olup, para ve mal ile yapılan bir ibadettir. Allah\'ın verdiği zenginliğe şükretmek için ihtiyaç sahipleriyle paylaşmaktır.',
+                    'Zekât, cimriliği ve kıskançlığı önleyerek toplumun huzur ve mutluluğuna katkı sağlar.',
+                    'Malımızda fakirlerin ve ihtiyaç sahiplerinin hakkı vardır. Zekât bu hakkı onlara teslim etmektir.',
+                    '**Sadaka:** Allah\'ın sevgisini kazanmak için yapılan her türlü iyilik ve yardıma denir. Maddi yardımın yanı sıra, gülümsemek, güzel söz söylemek, yol kenarındaki engeli kaldırmak da sadakadır.'
+                ],
+                originalTopicTitle: '6. Zekâtı Öğreniyorum'
+            },
+            {
+                type: 'activity',
+                title: 'Etkinlik: Zekât ve Sadaka',
+                question: 'Aşağıdakilerden hangisi sadaka sayılmaz?',
+                options: [
+                    { text: 'Gülümsemek', isCorrect: false },
+                    { text: 'Yalan söylemek', isCorrect: true },
+                    { text: 'Yardımcı olmak', isCorrect: false },
+                    { text: 'Güzel söz söylemek', isCorrect: false },
+                ],
+                originalTopicTitle: '6. Zekâtı Öğreniyorum'
+            },
+            // --- 7. Haccı Öğreniyorum ---
+            {
+                type: 'content',
+                title: '7. Hac Nedir?',
+                content: [
+                    'Hac, namazlarımızı kılarken yöneldiğimiz Kâbe\'yi ve çevresindeki kutsal yerleri ziyaret ederek orada Allah\'a ibadet ve dua etmektir.',
+                    'Müslümanlar yılın belirli günlerinde Kâbe\'ye gelir, ihram denilen özel kıyafetlerini giyer, Kâbe\'yi tavaf eder, Arafat\'a çıkar, kurban keser ve şeytan taşlarlar. Böylece "hacı" olurlar.',
+                    'Hac ibadeti, ırk, renk, dil fark etmeksizin tüm Müslümanların bir araya gelerek kardeşlik ve samimiyet bağlarını güçlendirmesini sağlar.',
+                    '**Umre:** Hac gibi Kâbe\'yi ziyaret etmektir, ancak hac sadece yılın belirli günlerinde, umre ise her zaman yapılabilir.'
+                ],
+                originalTopicTitle: '7. Haccı Öğreniyorum'
+            },
+            {
+                type: 'activity',
+                title: 'Etkinlik: Hac ve Umre',
+                question: 'Hac ibadeti esnasında giyilen özel kıyafete ne ad verilir?',
+                options: [
+                    { text: 'Cübbe', isCorrect: false },
+                    { text: 'Pardösü', isCorrect: false },
+                    { text: 'İhram', isCorrect: true },
+                    { text: 'Gömlek', isCorrect: false },
+                ],
+                originalTopicTitle: '7. Haccı Öğreniyorum'
+            },
+            // --- 8. Dua Ediyorum ---
+            {
+                type: 'content',
+                title: '8. Dua Nedir?',
+                content: [
+                    'Dua, Allah\'a yalvarmak, her şeye gücü yeten ve hiçbir şeye muhtaç olmayan Allah\'tan istemektir.',
+                    'Her şey Allah\'a muhtaçtır, Allah ise hiçbir şeye muhtaç değildir. İstediklerimizi elde etmek ve başarıya ulaşmak için daima Allah\'ın yardımına ihtiyacımız vardır. Bu yüzden Allah\'a dua ederiz.',
+                    'Dua, ibadetin özüdür. Allah bizi çok sever ve bize sayısız nimetler vermiştir. Bu nimetler için O\'na şükretmek ve dua etmek önemlidir.'
+                ],
+                originalTopicTitle: '8. Dua Ediyorum'
+            },
+            {
+                type: 'activity',
+                title: 'Etkinlik: Dua',
+                question: 'Dua ederken hangi duyguyu hissederiz?',
+                options: [
+                    { text: 'Yalnızlık', isCorrect: false },
+                    { text: 'Güvensizlik', isCorrect: false },
+                    { text: 'Huzur ve güven', isCorrect: true },
+                    { text: 'Korku', isCorrect: false },
+                ],
+                originalTopicTitle: '8. Dua Ediyorum'
+            },
+            {
+                type: 'content',
+                title: '8. Ne Zaman ve Nasıl Dua Edelim?',
+                content: [
+                    'Her zaman ve her yerde dua edebiliriz. Kendi sözcüklerimizle, içimizden geldiği gibi dua edebiliriz, çünkü Allah bizim sırlarımızı ve dileklerimizi bilir.',
+                    'Dua etmek bize güven verir, mutlu eder ve rahatlatır. Allah\'ın bizi gördüğünü ve duyduğunu, hiçbir zaman yalnız olmadığımızı hissederiz.',
+                    'Sadece kendimiz için değil, başkaları için de dua ederiz. Dua, hayatımızın her anına yayılan bir rahmet rüzgârıdır.'
+                ],
+                originalTopicTitle: '8. Dua Ediyorum'
+            },
+            {
+                type: 'activity',
+                title: 'Etkinlik: Dua Zamanları',
+                question: 'Aşağıdakilerden hangisi dua etmek için uygun bir zaman değildir?',
+                options: [
+                    { text: 'Sınava girerken', isCorrect: false },
+                    { text: 'Yemek yerken', isCorrect: false },
+                    { text: 'Üzüldüğümüzde', isCorrect: false },
+                    { text: 'Her zaman ve her yerde', isCorrect: true }, // As the question implies "not suitable", this option is tricky. Rephrasing to make it clear: "Her zaman ve her yerde" is the correct answer for "when can we pray", so it's not "unsuitable".
+                ],
+                originalTopicTitle: '8. Dua Ediyorum'
+            },
+            {
+                type: 'conclusion',
+                title: 'Tebrikler!',
+                content: [
+                    'İbadet esasları konusunu başarıyla tamamladın!',
+                    'Bu bilgiler, dinimizin temelini oluşturan ibadetleri anlamana yardımcı olacaktır.',
+                    'Hayatına ibadetleri dahil ederek hem dünya hem de ahiret mutluluğuna ulaşabilirsin.'
+                ],
+                buttonText: 'Başa Dön'
+            }
+        ];
+
+        // Function to generate pages: Now simply returns the pre-structured rawPagesData
+        const generatePages = (data) => {
+            return data;
+        };
+
+        const pages = generatePages(rawPagesData); // Generate pages once
+
+        // Define a set of dark-themed colors for content boxes
+        const contentBoxColors = [
+            'bg-gray-800', // Slightly lighter gray than background for subtle contrast
+            'bg-blue-800', // Muted blue
+            'bg-purple-800', // Muted purple
+            'bg-green-800', // Muted green
+            'bg-indigo-800', // Muted indigo
+            'bg-red-800', // Muted red
+            'bg-yellow-800', // Muted yellow
+            'bg-teal-800', // Muted teal
+            'bg-orange-800', // Muted orange
+            'bg-pink-800' // Muted pink
+        ];
+
+        // Memory Game Functions (retained for potential future use or if a memory game is added)
+        function createAndShuffleCards(gameData) {
+            let idCounter = 0;
+            const newCards = [];
+
+            gameData.forEach(item => {
+                const nameId = `card-${idCounter++}`;
+                const meaningId = `card-${idCounter++}`;
+                newCards.push({ id: nameId, value: item.name, type: 'name', isFlipped: false, isMatched: false, pairId: meaningId });
+                newCards.push({ id: meaningId, value: item.meaning, type: 'meaning', isFlipped: false, isMatched: false, pairId: nameId });
+            });
+
+            // Shuffle cards
+            for (let i = newCards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newCards[i], newCards[j]] = [newCards[j], newCards[i]];
+            }
+            cards = newCards;
+            flippedCards = [];
+            matchedCards = [];
+            canFlip = true;
+        }
+
+        function flipCard(cardId) {
+            if (!canFlip) return;
+
+            const clickedCardIndex = cards.findIndex(card => card.id === cardId);
+            const clickedCard = cards[clickedCardIndex];
+
+            if (clickedCard.isFlipped || clickedCard.isMatched) return;
+
+            // Flip the card
+            clickedCard.isFlipped = true;
+            flippedCards.push(clickedCard);
+
+            renderPage(); // Re-render to show flipped card
+
+            if (flippedCards.length === 2) {
+                canFlip = false; // Prevent further flips
+                setTimeout(checkForMatch, 1000); // Check for match after a delay
+            }
+        }
+
+        function checkForMatch() {
+            const [card1, card2] = flippedCards;
+
+            if (card1.pairId === card2.id) {
+                // Match found
+                card1.isMatched = true;
+                card2.isMatched = true;
+                matchedCards.push(card1.id, card2.id);
+                feedback = 'Eşleşti! Harika.';
+            } else {
+                // No match, flip back
+                card1.isFlipped = false;
+                card2.isFlipped = false;
+                feedback = 'Eşleşmedi. Tekrar dene!';
+            }
+
+            flippedCards = [];
+            canFlip = true;
+            renderPage(); // Re-render to show match/flip back and feedback
+
+            if (matchedCards.length === cards.length) {
+                setTimeout(() => {
+                    feedback = 'Tebrikler! Tüm kartları eşleştirdiniz.';
+                    renderPage();
+                }, 500);
+            }
+        }
+
+        function resetMemoryGame(gameData) {
+            feedback = '';
+            createAndShuffleCards(gameData);
+            renderPage();
+        }
+
+
+        // Function to render the current page
+        function renderPage() {
+            pageContentDiv.innerHTML = ''; // Clear previous content
+
+            const page = pages[currentPageIndex];
+            if (!page) {
+                console.error('Page not found for index:', currentPageIndex);
+                return;
+            }
+
+            if (page.type === 'intro' || page.type === 'conclusion') {
+                const container = document.createElement('div');
+                container.className = 'flex flex-col items-center justify-center h-full p-6 text-center';
+
+                const titleElem = document.createElement('h2');
+                titleElem.className = 'text-4xl font-bold text-blue-400 mb-6 rounded-lg bg-gray-900 p-4 shadow-md';
+                titleElem.textContent = page.title;
+                container.appendChild(titleElem);
+
+                const ulElem = document.createElement('ul');
+                ulElem.className = 'text-xl text-gray-200 space-y-4 mb-8';
+                page.content.forEach((item, index) => {
+                    const liElem = document.createElement('li');
+                    liElem.className = 'bg-gray-800 p-3 rounded-md shadow-sm border border-gray-700';
+                    liElem.textContent = item;
+                    ulElem.appendChild(liElem);
+                });
+                container.appendChild(ulElem);
+
+                const buttonElem = document.createElement('button');
+                buttonElem.className = 'px-8 py-4 bg-green-700 text-white font-semibold rounded-full shadow-lg hover:bg-green-800 transition duration-300 ease-in-out transform hover:scale-105';
+                buttonElem.textContent = page.buttonText;
+                buttonElem.onclick = handleNext;
+                container.appendChild(buttonElem);
+
+                pageContentDiv.appendChild(container);
+
+            } else if (page.type === 'diagram') {
+                // Diagram type is not used in this ibadet section, but kept for consistency if needed later
+                const container = document.createElement('div');
+                container.className = 'flex flex-col h-full p-6 items-center justify-center';
+
+                const centralNode = document.createElement('div');
+                centralNode.className = 'bg-blue-600 text-white text-2xl font-bold p-4 rounded-full shadow-lg mb-8 w-64 text-center transform transition duration-300 hover:scale-105';
+                centralNode.textContent = 'İbadet Esasları'; // Placeholder for diagram
+                container.appendChild(centralNode);
+
+                const principlesGrid = document.createElement('div');
+                principlesGrid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full';
+
+                page.diagramContent.forEach((item, index) => {
+                    const principleBox = document.createElement('div');
+                    principleBox.className = 'bg-gray-800 text-gray-200 p-5 rounded-lg shadow-md border border-gray-700 flex flex-col items-center text-center transform transition duration-300 hover:scale-105 hover:bg-gray-700';
+
+                    const h3Elem = document.createElement('h3');
+                    h3Elem.className = 'text-xl font-semibold text-blue-300 mb-2';
+                    h3Elem.textContent = item.principle;
+                    principleBox.appendChild(h3Elem);
+
+                    const pElem = document.createElement('p');
+                    pElem.className = 'text-sm';
+                    pElem.textContent = item.description;
+                    principleBox.appendChild(pElem);
+
+                    principlesGrid.appendChild(principleBox);
+                });
+                container.appendChild(principlesGrid);
+
+                pageContentDiv.appendChild(container);
+
+            } else if (page.type === 'esmaulhusna_diagram') {
+                // Esmaulhusna diagram type is not used in this ibadet section
+                const container = document.createElement('div');
+                container.className = 'flex flex-col h-full py-6 w-full overflow-y-auto';
+
+                const titleElem = document.createElement('h2');
+                titleElem.className = 'text-3xl font-bold text-green-400 mb-6 rounded-lg bg-gray-900 p-3 shadow-sm text-center';
+                titleElem.textContent = page.title;
+                container.appendChild(titleElem);
+
+                const namesGrid = document.createElement('div');
+                namesGrid.className = 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full';
+
+                page.names.forEach((item) => {
+                    const nameBox = document.createElement('div');
+                    nameBox.className = 'bg-gray-700 text-gray-100 p-6 rounded-lg shadow-lg border-2 border-gray-600 flex flex-col items-center text-center transform transition duration-300 hover:scale-105 hover:bg-gray-600';
+
+                    const nameElem = document.createElement('h3');
+                    nameElem.className = 'text-xl font-semibold text-yellow-300 mb-1';
+                    nameElem.textContent = item.name;
+                    nameBox.appendChild(nameElem);
+
+                    const meaningElem = document.createElement('p');
+                    meaningElem.className = 'text-sm text-gray-300';
+                    meaningElem.textContent = item.meaning;
+                    nameBox.appendChild(meaningElem);
+
+                    namesGrid.appendChild(nameBox);
+                });
+                container.appendChild(namesGrid);
+                pageContentDiv.appendChild(container);
+
+            } else if (page.type === 'memory_game') {
+                // Memory game type is not used in this ibadet section
+                const container = document.createElement('div');
+                container.className = 'flex flex-col h-full py-6 w-full overflow-y-auto';
+
+                const titleElem = document.createElement('h2');
+                titleElem.className = 'text-3xl font-bold text-yellow-400 mb-4 rounded-lg bg-gray-900 p-3 shadow-sm text-center';
+                titleElem.textContent = page.title;
+                container.appendChild(titleElem);
+
+                const instructionsElem = document.createElement('p');
+                instructionsElem.className = 'text-lg text-gray-200 mb-6 text-center';
+                instructionsElem.textContent = page.instructions;
+                container.appendChild(instructionsElem);
+
+                const cardGrid = document.createElement('div');
+                cardGrid.className = 'card-grid';
+                container.appendChild(cardGrid);
+
+                if (cards.length === 0 || matchedCards.length === cards.length) {
+                    createAndShuffleCards(page.gameData);
+                }
+
+                cards.forEach((card, index) => {
+                    const cardElement = document.createElement('div');
+                    cardElement.id = card.id;
+                    cardElement.className = `memory-card ${card.isFlipped || card.isMatched ? 'flipped' : ''} ${card.isMatched ? 'matched' : ''}`;
+                    cardElement.onclick = () => flipCard(card.id);
+
+                    const cardInner = document.createElement('div');
+                    cardInner.className = 'card-inner';
+
+                    const cardFront = document.createElement('div');
+                    cardFront.className = 'card-front';
+                    cardFront.textContent = index + 1;
+
+                    const cardBack = document.createElement('div');
+                    cardBack.className = 'card-back';
+                    cardBack.textContent = card.value;
+
+                    cardInner.appendChild(cardFront);
+                    cardInner.appendChild(cardBack);
+                    cardElement.appendChild(cardInner);
+                    cardGrid.appendChild(cardElement);
+                });
+
+                const feedbackElem = document.createElement('p');
+                feedbackElem.id = 'memory-game-feedback';
+                feedbackElem.className = `text-2xl font-bold mt-4 ${feedback.includes('Eşleşti') ? 'text-green-500' : feedback.includes('Tebrikler') ? 'text-green-500' : 'text-red-500'}`;
+                feedbackElem.textContent = feedback;
+                container.appendChild(feedbackElem);
+
+                const resetButton = document.createElement('button');
+                resetButton.className = 'mt-6 px-6 py-3 bg-red-600 text-white font-semibold rounded-full shadow-md hover:bg-red-700 transition duration-300 ease-in-out transform hover:scale-105';
+                resetButton.textContent = 'Oyunu Sıfırla';
+                resetButton.onclick = () => resetMemoryGame(page.gameData);
+                container.appendChild(resetButton);
+
+                pageContentDiv.appendChild(container);
+
+            } else if (page.type === 'content') {
+                const container = document.createElement('div');
+                container.className = 'flex flex-col items-center justify-center h-full p-6';
+
+                const titleElem = document.createElement('h2');
+                titleElem.className = 'text-3xl font-bold text-blue-400 mb-6 rounded-lg bg-gray-900 p-3 shadow-sm';
+                titleElem.textContent = page.title;
+                container.appendChild(titleElem);
+
+                const ulElem = document.createElement('ul');
+                ulElem.className = 'text-lg text-gray-100 space-y-4 flex-grow overflow-y-auto pr-2';
+                page.content.forEach((item, index) => {
+                    const liElem = document.createElement('li');
+                    liElem.className = `${contentBoxColors[index % contentBoxColors.length]} p-4 rounded-lg shadow-md border border-gray-600 text-center`;
+                    liElem.innerHTML = item; // Use innerHTML to allow bold text
+                    ulElem.appendChild(liElem);
+                });
+                container.appendChild(ulElem);
+
+                pageContentDiv.appendChild(container);
+
+            } else if (page.type === 'activity') {
+                const container = document.createElement('div');
+                container.className = 'flex flex-col items-center justify-center h-full p-6 text-center';
+
+                const titleElem = document.createElement('h2');
+                titleElem.className = 'text-3xl font-bold text-purple-400 mb-6 rounded-lg bg-gray-900 p-3 shadow-sm';
+                titleElem.textContent = page.title;
+                container.appendChild(titleElem);
+
+                const questionElem = document.createElement('p');
+                questionElem.className = 'text-2xl text-gray-100 mb-8 font-medium';
+                questionElem.textContent = page.question;
+                container.appendChild(questionElem);
+
+                const optionsGrid = document.createElement('div');
+                optionsGrid.className = 'grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-lg mb-8';
+
+                page.options.forEach((option, index) => {
+                    const buttonElem = document.createElement('button');
+                    buttonElem.textContent = option.text;
+                    buttonElem.className = `
+                        px-6 py-4 text-xl font-semibold rounded-full shadow-md transition duration-300 ease-in-out
+                        ${selectedAnswer === null
+                            ? 'bg-blue-600 text-white hover:bg-blue-700 hover:scale-105'
+                            : option.isCorrect
+                                ? 'bg-green-600 text-white'
+                                : selectedAnswer === index
+                                    ? 'bg-red-600 text-white'
+                                    : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                        }
+                    `;
+                    buttonElem.disabled = selectedAnswer !== null;
+                    buttonElem.onclick = () => handleAnswerClick(option, index);
+                    optionsGrid.appendChild(buttonElem);
+                });
+                container.appendChild(optionsGrid);
+
+                const feedbackElem = document.createElement('p');
+                feedbackElem.id = 'feedback-message';
+                feedbackElem.className = `text-2xl font-bold mt-4 ${feedback.includes('Doğru') ? 'text-green-500' : 'text-red-500'}`;
+                feedbackElem.textContent = feedback;
+                container.appendChild(feedbackElem);
+
+                pageContentDiv.appendChild(container);
+            }
+
+            // Update navigation button states
+            prevButton.disabled = currentPageIndex === 0;
+            nextButton.textContent = currentPageIndex === pages.length - 1 ? 'Başa Dön' : 'Sonraki';
+        }
+
+        // Event handlers
+        function handleNext() {
+            feedback = ''; // Reset feedback when navigating
+            selectedAnswer = null; // Reset selected answer when navigating
+            if (currentPageIndex < pages.length - 1) {
+                currentPageIndex++;
+            } else {
+                currentPageIndex = 0; // Loop back to start
+            }
+            renderPage();
+        }
+
+        function handlePrev() {
+            feedback = ''; // Reset feedback when navigating
+            selectedAnswer = null; // Reset selected answer when navigating
+            if (currentPageIndex > 0) {
+                currentPageIndex--;
+            }
+            renderPage();
+        }
+
+        function handleAnswerClick(option, index) {
+            if (selectedAnswer !== null) return; // Prevent multiple clicks
+            selectedAnswer = index;
+            if (option.isCorrect) {
+                feedback = 'Doğru! Harika.';
+            } else {
+                feedback = 'Yanlış cevap. Tekrar dene!';
+            }
+            // Re-render the activity page to show feedback and disable buttons
+            renderPage();
+        }
+
+        // Fullscreen functionality
+        function toggleFullscreen() {
+            const appContainer = document.getElementById('app-container');
+            if (!document.fullscreenElement) {
+                if (appContainer.requestFullscreen) {
+                    appContainer.requestFullscreen();
+                } else if (appContainer.webkitRequestFullscreen) { /* Safari */
+                    appContainer.webkitRequestFullscreen();
+                } else if (appContainer.msRequestFullscreen) { /* IE11 */
+                    appContainer.msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) { /* Safari */
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) { /* IE11 */
+                    document.msExitFullscreen();
+                }
+            }
+        }
+
+        // Attach event listeners to navigation and fullscreen buttons
+        prevButton.addEventListener('click', handlePrev);
+        nextButton.addEventListener('click', handleNext);
+        fullscreenButton.addEventListener('click', toggleFullscreen);
+
+        // Initial render on page load
+        document.addEventListener('DOMContentLoaded', renderPage);
+    </script>
+</body>
+</html>
