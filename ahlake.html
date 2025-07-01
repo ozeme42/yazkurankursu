@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ahlak Konuları Etkinlikleri</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Inter font import */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for content overflow */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #374151; /* gray-700 */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4B5563; /* gray-600 */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6B7280; /* gray-500 */
+        }
+        /* Styles for the custom message box */
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #1f2937; /* gray-800 */
+            color: #f9fafb; /* gray-50 */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            text-align: center;
+            max-width: 300px;
+            border: 1px solid #4b5563; /* gray-600 */
+        }
+        .message-box button {
+            background-color: #3b82f6; /* blue-500 */
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            margin-top: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .message-box button:hover {
+            background-color: #2563eb; /* blue-600 */
+        }
+
+        /* Shared Card Styles for Memory Game and Anagram */
+        .card-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 0.5rem;
+            width: 100%;
+            overflow-x: auto;
+            margin: 0 auto;
+            height: 100%;
+            align-items: center;
+        }
+
+        .game-card {
+            background-color: #374151; /* gray-700 */
+            height: 120px;
+            /* Removed flex-shrink: 0; */
+            width: 10rem; /* A base width */
+            max-width: calc(50% - 0.5rem); /* Allows two cards per row with gap, adjust as needed */
+            min-width: 8rem; /* Ensures cards don't become too small */
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #f9fafb;
+            cursor: pointer;
+            perspective: 1000px; /* For 3D flip effect on the card element itself */
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 2px solid #4b5563;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s; /* Apply transition here for the flip effect */
+            transform-style: preserve-3d; /* Preserve 3D space for children */
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden; /* Safari */
+            backface-visibility: hidden; /* Hide the back of the element when facing away */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+            box-sizing: border-box;
+            border-radius: 8px;
+        }
+
+        .card-front {
+            background-color: #3b82f6; /* blue-500 */
+            color: white;
+            transform: rotateY(0deg); /* Front face is initially visible */
+            border: 2px solid #2563eb; /* blue-600 */
+        }
+
+        .card-back {
+            background-color: #1f2937; /* gray-800 */
+            color: white;
+            transform: rotateY(180deg); /* Back face is initially rotated to be hidden */
+            border: 2px solid #4b5563; /* gray-600 */
+            font-size: 0.9rem; /* Smaller font for meaning */
+        }
+
+        /* When the parent .game-card has 'flipped' class, flip the .card-inner */
+        .game-card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        /* Matching Game Specific Styles */
+        .matching-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .matching-column {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .matching-item {
+            background-color: #374151; /* gray-700 */
+            color: #f9fafb;
+            padding: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 1px solid #4b5563;
+            text-align: center;
+        }
+        .matching-item:hover {
+            background-color: #4b5563; /* gray-600 */
+            transform: translateY(-2px);
+        }
+        .matching-item.selected {
+            background-color: #3b82f6; /* blue-500 */
+            border-color: #2563eb; /* blue-600 */
+            transform: scale(1.02);
+        }
+        .matching-item.correct {
+            background-color: #10b981; /* green-500 */
+            border-color: #059669; /* green-600 */
+            cursor: default;
+        }
+        .matching-item.incorrect {
+            background-color: #ef4444; /* red-500 */
+            border-color: #dc2626; /* red-600 */
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center">
+    <div id="app-container" class="bg-gray-800 rounded-none shadow-none p-6 w-full h-screen flex flex-col">
+        <div id="page-content" class="flex-grow flex items-center justify-center">
+            <!-- Page content will be rendered here by JavaScript -->
+        </div>
+
+        <div class="flex justify-between mt-6 p-4 border-t border-gray-700">
+            <button id="prev-button" class="px-6 py-3 bg-gray-700 text-gray-200 font-semibold rounded-full shadow-md hover:bg-gray-600 disabled:opacity-50 transition duration-300 ease-in-out transform hover:scale-105">
+                Önceki
+            </button>
+            <!-- Fullscreen button added here -->
+            <button id="fullscreen-button" class="px-6 py-3 bg-purple-600 text-white font-semibold rounded-full shadow-md hover:bg-purple-700 transition duration-300 ease-in-out transform hover:scale-105">
+                Tam Ekran
+            </button>
+            <button id="next-button" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-full shadow-md hover:bg-blue-700 transition duration-300 ease-in-out transform hover:scale-105">
+                Sonraki
+            </button>
+        </div>
+    </div>
+
+    <!-- Custom message box for fullscreen error -->
+    <div id="fullscreen-message-box" class="message-box">
+        <p>Uyarı: Bu bir örnek mesaj kutusudur. Tam ekran işlevi, tarayıcı güvenlik politikaları nedeniyle iframe ortamında doğrudan çalışmayabilir.</p>
+        <button onclick="document.getElementById('fullscreen-message-box').style.display = 'none';">Tamam</button>
+    </div>
+
+    <script>
+        // Global state variables
+        let currentPageIndex = 0;
+        let feedback = '';
+        let selectedAnswer = null; // For multiple choice and true/false
+        let selectedLeftMatchId = null; // For matching, stores only ID
+        let selectedRightMatchId = null; // For matching, stores only ID
+        let matchedPairs = []; // For matching, stores IDs of matched pairs
+        let currentMatchingPairs = []; // Stores the shuffled pairs for the current matching activity
+        let flippedAnagramCards = []; // Stores IDs of currently flipped anagram cards
+
+        // DOM elements
+        const pageContentDiv = document.getElementById('page-content');
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+        const fullscreenButton = document.getElementById('fullscreen-button'); // Get fullscreen button
+        const fullscreenMessageBox = document.getElementById('fullscreen-message-box'); // Get message box
+
+        // Helper to shuffle an array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Helper to shuffle a string (for anagrams)
+        function shuffleString(str) {
+            if (str.length <= 1) return str; // No need to shuffle single characters or empty strings
+            let a = str.split("");
+            let n = a.length;
+
+            for(let i = n - 1; i > 0; i--) {
+                let j = Math.floor(Math.random() * (i + 1));
+                let tmp = a[i];
+                a[i] = a[j];
+                a[j] = tmp;
+            }
+            // Ensure the shuffled string is not identical to the original
+            let shuffledStr = a.join("");
+            while (shuffledStr === str && n > 1) { // Re-shuffle if it's the same as original and has more than 1 char
+                a = str.split(""); // Reset to original characters
+                for(let i = n - 1; i > 0; i--) {
+                    let j = Math.floor(Math.random() * (i + 1));
+                    let tmp = a[i];
+                    a[i] = a[j];
+                    a[j] = tmp;
+                }
+                shuffledStr = a.join("");
+            }
+            return shuffledStr;
+        }
+
+        // Raw data for pages, specific to Ahlak Konuları
+        const rawPagesData = [
+            {
+                type: 'intro',
+                title: 'Ahlak Konuları Etkinliklerine Hoş Geldiniz!',
+                content: [
+                    'Bu bölümde Ahlak konularına ait etkinlikleri bulacaksınız.',
+                    'Bilgilerini test et ve öğrendiklerini pekiştir.',
+                    'Her soruyu dikkatlice oku ve doğru cevabı seçmeye çalış.'
+                ],
+                buttonText: 'Etkinliklere Başla!'
+            },
+            // --- Ahlak Konuları Etkinlikleri (Çoktan Seçmeli) ---
+            {
+                type: 'activity',
+                title: 'Ahlak Konuları Etkinlikleri - Bölüm 1 (Çoktan Seçmeli)',
+                question: 'Aşağıdakilerden hangisi güzel ahlak özelliklerinden değildir?',
+                options: [
+                    { text: 'Dürüstlük', isCorrect: false },
+                    { text: 'Yardımseverlik', isCorrect: false },
+                    { text: 'Yalan söylemek', isCorrect: true },
+                    { text: 'Hoşgörü', isCorrect: false },
+                ],
+                originalTopicTitle: 'Ahlak Konuları'
+            },
+            {
+                type: 'activity',
+                title: 'Ahlak Konuları Etkinlikleri - Bölüm 2 (Çoktan Seçmeli)',
+                question: 'Birine iyilik yaptığımızda ne demeliyiz?',
+                options: [
+                    { text: 'Teşekkür ederim', isCorrect: false },
+                    { text: 'Rica ederim', isCorrect: true },
+                    { text: 'Önemli değil', isCorrect: false },
+                    { text: 'Ne demek', isCorrect: false },
+                ],
+                originalTopicTitle: 'Ahlak Konuları'
+            },
+            // --- Ahlak Konuları Etkinlikleri (Doğru/Yanlış) ---
+            {
+                type: 'true_false',
+                title: 'Ahlak Konuları Etkinlikleri - Bölüm 3 (Doğru/Yanlış)',
+                question: 'Komşularımıza iyi davranmak dinimizin emridir.',
+                correctAnswer: true,
+                originalTopicTitle: 'Ahlak Konuları'
+            },
+            {
+                type: 'true_false',
+                title: 'Ahlak Konuları Etkinlikleri - Bölüm 4 (Doğru/Yanlış)',
+                question: 'Çevreyi kirletmek sevap kazandırır.',
+                correctAnswer: false,
+                originalTopicTitle: 'Ahlak Konuları'
+            },
+            // --- Ahlak Konuları Etkinlikleri (Boşluk Doldurma - Çoktan Seçmeliye Dönüştürüldü) ---
+            {
+                type: 'activity',
+                title: 'Ahlak Konuları Etkinlikleri - Bölüm 5 (Çoktan Seçmeli)',
+                question: 'Sözünde durmaya ne denir?',
+                options: [
+                    { text: 'Vefa', isCorrect: true },
+                    { text: 'İsraf', isCorrect: false },
+                    { text: 'Gıybet', isCorrect: false },
+                    { text: 'Haset', isCorrect: false },
+                ],
+                originalTopicTitle: 'Ahlak Konuları'
+            },
+            {
+                type: 'activity',
+                title: 'Ahlak Konuları Etkinlikleri - Bölüm 6 (Çoktan Seçmeli)',
+                question: 'Başkalarının kusurlarını araştırmaya ne denir?',
+                options: [
+                    { text: 'Tecessüs', isCorrect: true },
+                    { text: 'Tevazu', isCorrect: false },
+                    { text: 'İhlas', isCorrect: false },
+                    { text: 'Kanaat', isCorrect: false },
+                ],
+                originalTopicTitle: 'Ahlak Konuları'
+            },
+            // --- Ahlak Konuları Etkinlikleri (Eşleştirme) ---
+            {
+                type: 'matching',
+                title: 'Ahlak Konuları Etkinlikleri - Bölüm 7 (Eşleştirme)',
+                instructions: 'Aşağıdaki ahlaki kavramları anlamlarıyla eşleştirin.',
+                pairs: [
+                    { left: 'Sıdk', right: 'Doğruluk', id: 0 },
+                    { left: 'Emanet', right: 'Güvenilirlik', id: 1 },
+                    { left: 'İffet', right: 'Namusu koruma', id: 2 },
+                    { left: 'Şecaat', right: 'Cesaret', id: 3 }
+                ],
+                originalTopicTitle: 'Ahlak Konuları'
+            },
+            // --- Ahlak Konuları Anagram Etkinliği ---
+            {
+                type: 'anagram',
+                title: 'Ahlak Konuları Anagram Etkinliği',
+                instructions: 'Kutucukları çevirerek karışık harflerin doğru kelimesini bulun!',
+                gameData: [
+                    { solution: 'DÜRÜSTLÜK', id: 0 },
+                    { solution: 'SAYGI', id: 1 },
+                    { solution: 'SEVGİ', id: 2 },
+                    { solution: 'ADALET', id: 3 },
+                    { solution: 'HOŞGÖRÜ', id: 4 },
+                    { solution: 'VEFA', id: 5 },
+                    { solution: 'CÖMERTLİK', id: 6 },
+                    { solution: 'TEMİZLİK', id: 7 },
+                    { solution: 'İSRAF', id: 8 },
+                    { solution: 'GIYBET', id: 9 },
+                    { solution: 'YALAN', id: 10 },
+                    { solution: 'KİBİR', id: 11 },
+                    { solution: 'HASAD', id: 12 },
+                    { solution: 'TEVAZU', id: 13 },
+                    { solution: 'KANAAT', id: 14 },
+                    { solution: 'SABIR', id: 15 },
+                    { solution: 'ŞÜKÜR', id: 16 },
+                    { solution: 'İHLAS', id: 17 },
+                    { solution: 'MERHAMET', id: 18 },
+                    { solution: 'AFFETMEK', id: 19 }
+                ]
+            },
+            {
+                type: 'conclusion',
+                title: 'Ahlak Konuları Etkinliklerini Tamamladın!',
+                content: [
+                    'Ahlak konularına ait tüm etkinlikleri başarıyla tamamladın!',
+                    'Bu etkinlikler, öğrendiklerini pekiştirmene ve konuları daha iyi anlamana yardımcı oldu.',
+                    'Dinini öğrenme yolculuğunda başarılar dileriz!'
+                ],
+                buttonText: 'Başa Dön'
+            }
+        ];
+
+        // Function to generate pages: Now simply returns the pre-structured rawPagesData
+        const generatePages = (data) => {
+            return data;
+        };
+
+        const pages = generatePages(rawPagesData); // Generate pages once
+
+        // Define a set of dark-themed colors for content boxes (not directly used for activities, but good to keep)
+        const contentBoxColors = [
+            'bg-gray-800',
+            'bg-blue-800',
+            'bg-purple-800',
+            'bg-green-800',
+            'bg-indigo-800',
+            'bg-red-800',
+            'bg-yellow-800',
+            'bg-teal-800',
+            'bg-orange-800',
+            'bg-pink-800'
+        ];
+
+        // Function to render the current page
+        function renderPage() {
+            pageContentDiv.innerHTML = ''; // Clear previous content
+            // Only reset feedback if it's not an anagram page or if we are navigating away from an anagram page
+            // This prevents feedback from being cleared immediately after an anagram card flip.
+            if (pages[currentPageIndex].type !== 'anagram') {
+                feedback = '';
+            }
+            selectedAnswer = null; // Reset selected answer for multiple choice/true_false
+            selectedLeftMatchId = null; // Reset matching selections
+            selectedRightMatchId = null; // Reset matching selections
+            currentMatchingPairs = []; // Clear shuffled pairs to re-initialize on next matching page
+            matchedPairs = []; // Reset matched pairs for matching game
+            // flippedAnagramCards is intentionally NOT reset here, as its state persists across re-renders within the same anagram page.
+
+            const page = pages[currentPageIndex];
+            if (!page) {
+                console.error('Page not found for index:', currentPageIndex);
+                return;
+            }
+
+            if (page.type === 'intro' || page.type === 'conclusion') {
+                const container = document.createElement('div');
+                container.className = 'flex flex-col items-center justify-center h-full p-6 text-center';
+
+                const titleElem = document.createElement('h2');
+                titleElem.className = 'text-4xl font-bold text-blue-400 mb-6 rounded-lg bg-gray-900 p-4 shadow-md';
+                titleElem.textContent = page.title;
+                container.appendChild(titleElem);
+
+                const ulElem = document.createElement('ul');
+                ulElem.className = 'text-xl text-gray-200 space-y-4 mb-8';
+                page.content.forEach((item) => {
+                    const liElem = document.createElement('li');
+                    liElem.className = 'bg-gray-800 p-3 rounded-md shadow-sm border border-gray-700';
+                    liElem.textContent = item;
+                    ulElem.appendChild(liElem);
+                });
+                container.appendChild(ulElem);
+
+                const buttonElem = document.createElement('button');
+                buttonElem.className = 'px-8 py-4 bg-green-700 text-white font-semibold rounded-full shadow-lg hover:bg-green-800 transition duration-300 ease-in-out transform hover:scale-105';
+                buttonElem.textContent = page.buttonText;
+                buttonElem.onclick = handleNext;
+                container.appendChild(buttonElem);
+
+                pageContentDiv.appendChild(container);
+
+            } else if (page.type === 'activity') { // Multiple Choice (now includes former fill-in-the-blank)
+                const container = document.createElement('div');
+                container.className = 'flex flex-col items-center justify-center h-full p-6 text-center';
+
+                const titleElem = document.createElement('h2');
+                titleElem.className = 'text-3xl font-bold text-purple-400 mb-6 rounded-lg bg-gray-900 p-3 shadow-sm';
+                titleElem.textContent = page.title;
+                container.appendChild(titleElem);
+
+                const questionElem = document.createElement('p');
+                questionElem.className = 'text-2xl text-gray-100 mb-8 font-medium';
+                questionElem.textContent = page.question;
+                container.appendChild(questionElem);
+
+                const optionsGrid = document.createElement('div');
+                optionsGrid.className = 'grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-lg mb-8';
+
+                page.options.forEach((option, index) => {
+                    const buttonElem = document.createElement('button');
+                    buttonElem.textContent = option.text;
+                    buttonElem.className = `
+                        px-6 py-4 text-xl font-semibold rounded-full shadow-md transition duration-300 ease-in-out
+                        ${selectedAnswer === null
+                            ? 'bg-blue-600 text-white hover:bg-blue-700 hover:scale-105'
+                            : option.isCorrect
+                                ? 'bg-green-600 text-white'
+                                : selectedAnswer === index
+                                    ? 'bg-red-600 text-white'
+                                    : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                        }
+                    `;
+                    buttonElem.disabled = selectedAnswer !== null;
+                    buttonElem.onclick = () => handleAnswerClick(option, index);
+                    optionsGrid.appendChild(buttonElem);
+                });
+                container.appendChild(optionsGrid);
+
+                const feedbackElem = document.createElement('p');
+                feedbackElem.id = 'feedback-message';
+                feedbackElem.className = `text-2xl font-bold mt-4 ${feedback.includes('Doğru') ? 'text-green-500' : 'text-red-500'}`;
+                feedbackElem.textContent = feedback;
+                container.appendChild(feedbackElem);
+
+                pageContentDiv.appendChild(container);
+            } else if (page.type === 'true_false') { // True/False
+                const container = document.createElement('div');
+                container.className = 'flex flex-col items-center justify-center h-full p-6 text-center';
+
+                const titleElem = document.createElement('h2');
+                titleElem.className = 'text-3xl font-bold text-teal-400 mb-6 rounded-lg bg-gray-900 p-3 shadow-sm';
+                titleElem.textContent = page.title;
+                container.appendChild(titleElem);
+
+                const questionElem = document.createElement('p');
+                questionElem.className = 'text-2xl text-gray-100 mb-8 font-medium';
+                questionElem.textContent = page.question;
+                container.appendChild(questionElem);
+
+                const optionsGrid = document.createElement('div');
+                optionsGrid.className = 'grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-lg mb-8';
+
+                ['Doğru', 'Yanlış'].forEach((optionText, index) => {
+                    const isCorrectOption = (optionText === 'Doğru' && page.correctAnswer === true) ||
+                                            (optionText === 'Yanlış' && page.correctAnswer === false);
+                    const buttonElem = document.createElement('button');
+                    buttonElem.textContent = optionText;
+                    buttonElem.className = `
+                        px-6 py-4 text-xl font-semibold rounded-full shadow-md transition duration-300 ease-in-out
+                        ${selectedAnswer === null
+                            ? 'bg-blue-600 text-white hover:bg-blue-700 hover:scale-105'
+                            : isCorrectOption
+                                ? 'bg-green-600 text-white'
+                                : selectedAnswer === index // If this was the selected (wrong) answer
+                                    ? 'bg-red-600 text-white'
+                                    : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                        }
+                    `;
+                    buttonElem.disabled = selectedAnswer !== null;
+                    buttonElem.onclick = () => handleTrueFalseClick(isCorrectOption, index);
+                    optionsGrid.appendChild(buttonElem);
+                });
+                container.appendChild(optionsGrid);
+
+                const feedbackElem = document.createElement('p');
+                feedbackElem.id = 'feedback-message';
+                feedbackElem.className = `text-2xl font-bold mt-4 ${feedback.includes('Doğru') ? 'text-green-500' : 'text-red-500'}`;
+                feedbackElem.textContent = feedback;
+                container.appendChild(feedbackElem);
+
+                pageContentDiv.appendChild(container);
+            } else if (page.type === 'matching') { // Matching Activity
+                const container = document.createElement('div');
+                container.className = 'flex flex-col items-center justify-center h-full p-6 text-center';
+
+                const titleElem = document.createElement('h2');
+                titleElem.className = 'text-3xl font-bold text-yellow-400 mb-4 rounded-lg bg-gray-900 p-3 shadow-sm';
+                titleElem.textContent = page.title;
+                container.appendChild(titleElem);
+
+                const instructionsElem = document.createElement('p');
+                instructionsElem.className = 'text-lg text-gray-200 mb-6 text-center';
+                instructionsElem.textContent = page.instructions;
+                container.appendChild(instructionsElem);
+
+                // Initialize or re-initialize currentMatchingPairs
+                // Only re-initialize if it's a new matching game or all pairs are matched
+                if (currentMatchingPairs.length === 0 || matchedPairs.length === page.pairs.length) {
+                    currentMatchingPairs = page.pairs.map((p) => ({ ...p })); // Copy pairs to add id if not present
+                    currentMatchingPairs.forEach((p, i) => { if (p.id === undefined) p.id = i; }); // Ensure unique IDs
+                    currentMatchingPairs.rightShuffled = shuffleArray([...currentMatchingPairs.map(p => ({ value: p.right, id: p.id }))]);
+                    matchedPairs = []; // Reset for new game
+                    selectedLeftMatchId = null; // Reset selections for new game
+                    selectedRightMatchId = null; // Reset selections for new game
+                }
+
+                const matchingGrid = document.createElement('div');
+                matchingGrid.className = 'matching-grid';
+
+                const leftColumn = document.createElement('div');
+                leftColumn.className = 'matching-column';
+                currentMatchingPairs.forEach((item) => {
+                    const itemElem = document.createElement('div');
+                    itemElem.textContent = item.left;
+                    itemElem.dataset.id = item.id;
+                    itemElem.dataset.column = 'left';
+                    itemElem.className = `matching-item ${selectedLeftMatchId === item.id ? 'selected' : ''} ${matchedPairs.includes(item.id) ? 'correct' : ''}`;
+                    itemElem.onclick = () => handleMatchClick(item.id, 'left');
+                    // Disable if already matched
+                    if (matchedPairs.includes(item.id)) {
+                        itemElem.style.pointerEvents = 'none';
+                    }
+                    leftColumn.appendChild(itemElem);
+                });
+                matchingGrid.appendChild(leftColumn);
+
+                const rightColumn = document.createElement('div');
+                rightColumn.className = 'matching-column';
+                currentMatchingPairs.rightShuffled.forEach((item) => {
+                    const itemElem = document.createElement('div');
+                    itemElem.textContent = item.value;
+                    itemElem.dataset.id = item.id;
+                    itemElem.dataset.column = 'right';
+                    itemElem.className = `matching-item ${selectedRightMatchId === item.id ? 'selected' : ''} ${matchedPairs.includes(item.id) ? 'correct' : ''}`;
+                    itemElem.onclick = () => handleMatchClick(item.id, 'right');
+                    // Disable if already matched
+                    if (matchedPairs.includes(item.id)) {
+                        itemElem.style.pointerEvents = 'none';
+                    }
+                    rightColumn.appendChild(itemElem);
+                });
+                matchingGrid.appendChild(rightColumn);
+                container.appendChild(matchingGrid);
+
+                const checkMatchButton = document.createElement('button');
+                checkMatchButton.textContent = 'Eşleştirmeyi Kontrol Et';
+                checkMatchButton.className = `px-6 py-3 bg-blue-600 text-white font-semibold rounded-full shadow-md hover:bg-blue-700 transition duration-300 ease-in-out transform hover:scale-105 mt-6
+                    ${(selectedLeftMatchId !== null && selectedRightMatchId !== null && !matchedPairs.includes(selectedLeftMatchId)) ? '' : 'opacity-50 cursor-not-allowed'}`;
+                checkMatchButton.disabled = !(selectedLeftMatchId !== null && selectedRightMatchId !== null && !matchedPairs.includes(selectedLeftMatchId));
+                checkMatchButton.onclick = checkMatchingPair;
+                container.appendChild(checkMatchButton);
+
+                const feedbackElem = document.createElement('p');
+                feedbackElem.id = 'feedback-message';
+                feedbackElem.className = `text-2xl font-bold mt-4 ${feedback.includes('Doğru') ? 'text-green-500' : 'text-red-500'}`;
+                feedbackElem.textContent = feedback;
+                container.appendChild(feedbackElem);
+
+                if (matchedPairs.length === page.pairs.length) {
+                    const completionMessage = document.createElement('p');
+                    completionMessage.className = 'text-2xl font-bold text-green-500 mt-4';
+                    completionMessage.textContent = 'Tebrikler! Tüm eşleştirmeleri tamamladınız!';
+                    container.appendChild(completionMessage);
+                }
+
+                pageContentDiv.appendChild(container);
+            } else if (page.type === 'anagram') { // Anagram Activity
+                const container = document.createElement('div');
+                // Removed items-center and justify-center from here to allow anagram grid to spread
+                container.className = 'flex flex-col h-full p-6 text-center w-full';
+
+                const titleElem = document.createElement('h2');
+                titleElem.className = 'text-3xl font-bold text-pink-400 mb-4 rounded-lg bg-gray-900 p-3 shadow-sm';
+                titleElem.textContent = page.title;
+                container.appendChild(titleElem);
+
+                const instructionsElem = document.createElement('p');
+                instructionsElem.className = 'text-lg text-gray-200 mb-6 text-center';
+                instructionsElem.textContent = page.instructions;
+                container.appendChild(instructionsElem);
+
+                const anagramGrid = document.createElement('div');
+                // Updated anagramGrid class for horizontal alignment and full width with justify-around
+                anagramGrid.className = 'card-grid flex-grow flex items-center justify-space-around overflow-x-auto w-full';
+                container.appendChild(anagramGrid);
+
+                // Initialize shuffled words for this anagram page if not already done
+                if (!page.shuffledWords) {
+                    page.shuffledWords = page.gameData.map(item => ({
+                        id: item.id,
+                        jumbled: shuffleString(item.solution)
+                    }));
+                }
+
+                page.shuffledWords.forEach((item) => {
+                    const cardElement = document.createElement('div');
+                    cardElement.dataset.id = item.id; // Use dataset for ID
+                    // Check if this card's ID is in the flippedAnagramCards array
+                    const isFlipped = flippedAnagramCards.includes(item.id);
+                    cardElement.className = `game-card ${isFlipped ? 'flipped' : ''}`;
+                    cardElement.onclick = () => handleAnagramClick(item.id);
+
+                    const cardInner = document.createElement('div');
+                    cardInner.className = 'card-inner';
+
+                    const cardFront = document.createElement('div');
+                    cardFront.className = 'card-front';
+                    // Use the pre-shuffled jumbled text
+                    cardFront.textContent = item.jumbled;
+
+                    const cardBack = document.createElement('div');
+                    cardBack.className = 'card-back';
+                    // Find the original solution from gameData using the id
+                    const originalSolution = page.gameData.find(dataItem => dataItem.id === item.id).solution;
+                    cardBack.textContent = originalSolution;
+
+                    cardInner.appendChild(cardFront);
+                    cardInner.appendChild(cardBack);
+                    cardElement.appendChild(cardInner);
+                    anagramGrid.appendChild(cardElement);
+                });
+
+                const feedbackElem = document.createElement('p');
+                feedbackElem.id = 'feedback-message';
+                feedbackElem.className = `text-2xl font-bold mt-4 ${feedback.includes('Gördün mü') ? 'text-yellow-400' : ''}`;
+                feedbackElem.textContent = feedback;
+                container.appendChild(feedbackElem);
+
+                pageContentDiv.appendChild(container);
+            }
+
+
+            // Update navigation button states
+            prevButton.disabled = currentPageIndex === 0;
+            nextButton.textContent = currentPageIndex === pages.length - 1 ? 'Başa Dön' : 'Sonraki';
+        }
+
+        // Event handlers
+        function handleNext() {
+            feedback = ''; // Reset feedback when navigating
+            selectedAnswer = null; // Reset selected answer when navigating
+            selectedLeftMatchId = null; // Reset matching selections
+            selectedRightMatchId = null; // Reset matching selections
+            currentMatchingPairs = []; // Clear shuffled pairs to re-initialize on next matching page
+            matchedPairs = []; // Reset matched pairs for matching game
+            flippedAnagramCards = []; // Reset flipped anagram cards for new game
+
+            // Clear shuffledWords for the *next* page if it's an anagram page, so it shuffles anew
+            const nextPage = pages[currentPageIndex + 1];
+            if (nextPage && nextPage.type === 'anagram' && nextPage.shuffledWords) {
+                delete nextPage.shuffledWords;
+            }
+
+
+            if (currentPageIndex < pages.length - 1) {
+                currentPageIndex++;
+            } else {
+                currentPageIndex = 0; // Loop back to start
+            }
+            renderPage();
+        }
+
+        function handlePrev() {
+            feedback = ''; // Reset feedback when navigating
+            selectedAnswer = null; // Reset selected answer when navigating
+            selectedLeftMatchId = null; // Reset matching selections
+            selectedRightMatchId = null; // Reset matching selections
+            currentMatchingPairs = []; // Clear shuffled pairs to re-initialize on next matching page
+            matchedPairs = []; // Reset matched pairs for matching game
+            flippedAnagramCards = []; // Reset flipped anagram cards for new game
+
+            // Clear shuffledWords for the *previous* page if it's an anagram page, so it shuffles anew
+            const prevPage = pages[currentPageIndex - 1];
+            if (prevPage && prevPage.type === 'anagram' && prevPage.shuffledWords) {
+                delete prevPage.shuffledWords;
+            }
+
+
+            if (currentPageIndex > 0) {
+                currentPageIndex--;
+            }
+            renderPage();
+        }
+
+        function handleAnswerClick(option, index) { // For Multiple Choice
+            if (selectedAnswer !== null) return; // Prevent multiple clicks
+            selectedAnswer = index;
+            if (option.isCorrect) {
+                feedback = 'Doğru! Harika.';
+            } else {
+                feedback = 'Yanlış cevap. Tekrar dene!';
+            }
+            renderPage();
+        }
+
+        function handleTrueFalseClick(isCorrectOption, index) { // For True/False
+            if (selectedAnswer !== null) return;
+            selectedAnswer = index;
+            if (isCorrectOption) {
+                feedback = 'Doğru! Harika.';
+            } else {
+                feedback = 'Yanlış cevap. Tekrar dene!';
+            }
+            renderPage();
+        }
+
+        function handleMatchClick(id, column) { // For Matching
+            // Check if the clicked item is already part of a matched pair
+            if (matchedPairs.includes(id)) return;
+
+            if (column === 'left') {
+                // If the same item is clicked again, deselect it
+                if (selectedLeftMatchId === id) {
+                    selectedLeftMatchId = null;
+                } else {
+                    selectedLeftMatchId = id;
+                }
+            } else { // column === 'right'
+                // If the same item is clicked again, deselect it
+                if (selectedRightMatchId === id) {
+                    selectedRightMatchId = null;
+                } else {
+                    selectedRightMatchId = id;
+                }
+            }
+            feedback = ''; // Clear previous feedback on new selection
+            renderPage();
+        }
+
+        function checkMatchingPair() { // For Matching
+            if (selectedLeftMatchId === null || selectedRightMatchId === null) {
+                feedback = 'Lütfen her iki sütundan da birer öğe seçin.';
+                renderPage();
+                return;
+            }
+
+            // Get the current page to access the original pairs data
+            const page = pages[currentPageIndex];
+            // Find the original pair using the ID from the left selection
+            // We need to ensure the `id` property exists on the pairs in rawPagesData for this to work
+            const originalPair = page.pairs.find(p => p.id === selectedLeftMatchId);
+
+            if (originalPair && originalPair.id === selectedRightMatchId) {
+                // Match found
+                feedback = 'Doğru eşleştirme! Harika.';
+                matchedPairs.push(selectedLeftMatchId); // Add the ID of the matched pair
+                selectedLeftMatchId = null; // Clear selections
+                selectedRightMatchId = null; // Clear selections
+                renderPage(); // Re-render to show correct state and clear selections
+            } else {
+                // No match
+                feedback = 'Yanlış eşleştirme. Tekrar dene!';
+
+                // Get the actual DOM elements for visual feedback *after* re-render
+                // We need to re-render first to ensure we're getting the current DOM elements
+                renderPage(); // Re-render to clear selections and show feedback
+
+                // Now, get the elements that were just rendered based on the *previously* selected IDs
+                const leftElem = document.querySelector(`[data-id="${selectedLeftMatchId}"][data-column="left"]`);
+                const rightElem = document.querySelector(`[data-id="${selectedRightMatchId}"][data-column="right"]`);
+
+                if (leftElem) leftElem.classList.add('incorrect');
+                if (rightElem) rightElem.classList.add('incorrect');
+
+                // Clear selections and incorrect state after a short delay
+                setTimeout(() => {
+                    if (leftElem) leftElem.classList.remove('incorrect', 'selected');
+                    if (rightElem) rightElem.classList.remove('incorrect', 'selected');
+                    selectedLeftMatchId = null;
+                    selectedRightMatchId = null;
+                    renderPage(); // Re-render again to clear incorrect state and selections
+                }, 800);
+            }
+        }
+
+        function handleAnagramClick(id) { // For Anagram Activity
+            const index = flippedAnagramCards.indexOf(id);
+            if (index > -1) {
+                // Card is already flipped, flip it back
+                flippedAnagramCards.splice(index, 1);
+                feedback = ''; // Clear feedback when flipping back
+            } else {
+                // Card is not flipped, flip it
+                flippedAnagramCards.push(id);
+                // No automatic flip back or feedback message needed for "Kelimeyi gördün mü?"
+            }
+            renderPage(); // Re-render to show the immediate flip
+        }
+
+
+        // Fullscreen functionality
+        function toggleFullscreen() {
+            const appContainer = document.getElementById('app-container');
+            if (!document.fullscreenElement) {
+                if (appContainer.requestFullscreen) {
+                    appContainer.requestFullscreen();
+                } else if (appContainer.webkitRequestFullscreen) { /* Safari */
+                    appContainer.webkitRequestFullscreen();
+                } else if (appContainer.msRequestFullscreen) { /* IE11 */
+                    appContainer.msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) { /* Safari */
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) { /* IE11 */
+                    document.msExitFullscreen();
+                }
+            }
+        }
+
+        // Attach event listeners to navigation and fullscreen buttons
+        prevButton.addEventListener('click', handlePrev);
+        nextButton.addEventListener('click', handleNext);
+        fullscreenButton.addEventListener('click', toggleFullscreen);
+
+        // Initial render on page load
+        document.addEventListener('DOMContentLoaded', renderPage);
+    </script>
+</body>
+</html>
