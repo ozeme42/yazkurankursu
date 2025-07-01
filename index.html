@@ -24,34 +24,69 @@
             Öğrenmek istediğin konuyu seçerek başlayabilirsin.
         </p>
 
-        <div class="flex flex-col space-y-6 w-full max-w-md">
-            <!-- İnanç Konuları Linki -->
-            <a href="inanc.html" class="block">
-                <button class="w-full px-8 py-4 bg-blue-600 text-white font-semibold rounded-full shadow-lg hover:bg-blue-700 transition duration-300 ease-in-out transform hover:scale-105 text-2xl">
-                    İnanç
-                </button>
-            </a>
+        <!-- Her bir ders bloğu için ana konteyner - Şimdi 2 sütunlu düzen -->
+        <!-- Responsive sınıflar: küçük ekranlarda 1, orta ve büyük ekranlarda 2 sütun -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
 
-            <!-- İbadet Konuları Linki -->
-            <a href="ibadet.html" class="block">
-                <button class="w-full px-8 py-4 bg-purple-600 text-white font-semibold rounded-full shadow-lg hover:bg-purple-700 transition duration-300 ease-in-out transform hover:scale-105 text-2xl">
-                    İbadet
-                </button>
-            </a>
+            <!-- İnanç Konuları Bloğu -->
+            <div class="bg-gray-700 p-6 rounded-xl shadow-lg flex flex-col space-y-4">
+                <h2 class="text-3xl font-bold text-blue-300 mb-4">İnanç Konuları</h2>
+                <a href="inanc.html" class="block">
+                    <button class="w-full px-8 py-4 bg-blue-600 text-white font-semibold rounded-full shadow-lg hover:bg-blue-700 transition duration-300 ease-in-out transform hover:scale-105 text-2xl">
+                        İnanç
+                    </button>
+                </a>
+                <a href="inance.html" class="block">
+                    <button class="w-full px-8 py-4 bg-blue-500 text-white font-semibold rounded-full shadow-lg hover:bg-blue-600 transition duration-300 ease-in-out transform hover:scale-105 text-lg">
+                        İnanç Etkinlikleri
+                    </button>
+                </a>
+            </div>
 
-            <!-- Siyer Konuları Linki -->
-            <a href="siyer.html" class="block">
-                <button class="w-full px-8 py-4 bg-green-600 text-white font-semibold rounded-full shadow-lg hover:bg-green-700 transition duration-300 ease-in-out transform hover:scale-105 text-2xl">
-                    Siyer
-                </button>
-            </a>
+            <!-- İbadet Konuları Bloğu -->
+            <div class="bg-gray-700 p-6 rounded-xl shadow-lg flex flex-col space-y-4">
+                <h2 class="text-3xl font-bold text-purple-300 mb-4">İbadet Konuları</h2>
+                <a href="ibadet.html" class="block">
+                    <button class="w-full px-8 py-4 bg-purple-600 text-white font-semibold rounded-full shadow-lg hover:bg-purple-700 transition duration-300 ease-in-out transform hover:scale-105 text-2xl">
+                        İbadet
+                    </button>
+                </a>
+                <a href="ibadete.html" class="block">
+                    <button class="w-full px-8 py-4 bg-purple-500 text-white font-semibold rounded-full shadow-lg hover:bg-purple-600 transition duration-300 ease-in-out transform hover:scale-105 text-lg">
+                        İbadet Etkinlikleri
+                    </button>
+                </a>
+            </div>
 
-            <!-- Ahlak Konuları Linki -->
-            <a href="ahlak.html" class="block">
-                <button class="w-full px-8 py-4 bg-yellow-600 text-white font-semibold rounded-full shadow-lg hover:bg-yellow-700 transition duration-300 ease-in-out transform hover:scale-105 text-2xl">
-                    Ahlak
-                </button>
-            </a>
+            <!-- Siyer Konuları Bloğu -->
+            <div class="bg-gray-700 p-6 rounded-xl shadow-lg flex flex-col space-y-4">
+                <h2 class="text-3xl font-bold text-green-300 mb-4">Siyer Konuları</h2>
+                <a href="siyer.html" class="block">
+                    <button class="w-full px-8 py-4 bg-green-600 text-white font-semibold rounded-full shadow-lg hover:bg-green-700 transition duration-300 ease-in-out transform hover:scale-105 text-2xl">
+                        Siyer
+                    </button>
+                </a>
+                <a href="siyere.html" class="block">
+                    <button class="w-full px-8 py-4 bg-green-500 text-white font-semibold rounded-full shadow-lg hover:bg-green-600 transition duration-300 ease-in-out transform hover:scale-105 text-lg">
+                        Siyer Etkinlikleri
+                    </button>
+                </a>
+            </div>
+
+            <!-- Ahlak Konuları Bloğu -->
+            <div class="bg-gray-700 p-6 rounded-xl shadow-lg flex flex-col space-y-4">
+                <h2 class="text-3xl font-bold text-yellow-300 mb-4">Ahlak Konuları</h2>
+                <a href="ahlak.html" class="block">
+                    <button class="w-full px-8 py-4 bg-yellow-600 text-white font-semibold rounded-full shadow-lg hover:bg-yellow-700 transition duration-300 ease-in-out transform hover:scale-105 text-2xl">
+                        Ahlak
+                    </button>
+                </a>
+                <a href="ahlake.html" class="block">
+                    <button class="w-full px-8 py-4 bg-yellow-500 text-white font-semibold rounded-full shadow-lg hover:bg-yellow-600 transition duration-300 ease-in-out transform hover:scale-105 text-lg">
+                        Ahlak Etkinlikleri
+                    </button>
+                </a>
+            </div>
         </div>
 
         <p class="text-sm text-gray-400 mt-12">
