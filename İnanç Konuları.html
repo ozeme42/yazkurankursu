@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İnanç Konuları İnteraktif Infografik</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Inter font import */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for content overflow */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #374151; /* gray-700 */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4B5563; /* gray-600 */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6B7280; /* gray-500 */
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-4">
+    <div id="app-container" class="bg-gray-800 rounded-2xl shadow-xl p-6 w-full max-w-4xl h-[calc(100vh-6rem)] flex flex-col">
+        <div id="page-content" class="flex-grow flex items-center justify-center">
+            <!-- Page content will be rendered here by JavaScript -->
+        </div>
+
+        <div class="flex justify-between mt-6 p-4 border-t border-gray-700">
+            <button id="prev-button" class="px-6 py-3 bg-gray-700 text-gray-200 font-semibold rounded-full shadow-md hover:bg-gray-600 disabled:opacity-50 transition duration-300 ease-in-out transform hover:scale-105">
+                Önceki
+            </button>
+            <button id="next-button" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-full shadow-md hover:bg-blue-700 transition duration-300 ease-in-out transform hover:scale-105">
+                Sonraki
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Global state variables
+        let currentPageIndex = 0;
+        let feedback = '';
+        let selectedAnswer = null;
+
+        // DOM elements
+        const pageContentDiv = document.getElementById('page-content');
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+
+        // Raw data for pages, will be processed to split content and provide distinct activities per topic
+        const rawPagesData = [
+            {
+                type: 'intro',
+                title: 'İnanç Konularına Hoş Geldiniz!',
+                content: [
+                    'İslam dininin temelini oluşturan inanç esasları, "âmentü" olarak bilinir.',
+                    'Bu esaslara gönülden inanmak, Müslüman olmanın temelidir.',
+                    'Toplamda altı temel maddeden oluşur.'
+                ],
+                buttonText: 'Başlayalım!'
+            },
+            {
+                type: 'diagram',
+                title: '', // Başlık kaldırıldı
+                diagramContent: [
+                    { principle: '1. Allah\'a İman', description: 'Allah\'ın varlığına, birliğine ve tüm sıfatlarına inanmak.' },
+                    { principle: '2. Meleklere İman', description: 'Allah\'ın nurdan yarattığı, günah işlemeyen varlıklar olduğuna inanmak.' },
+                    { principle: '3. Kitaplara İman', description: 'Allah tarafından peygamberlere gönderilen ilahi kitaplara inanmak.' },
+                    { principle: '4. Peygamberlere İman', description: 'Allah\'ın insanlara doğru yolu göstermek için gönderdiği elçilere inanmak.' },
+                    { principle: '5. Ahiret Gününe İman', description: 'Ölümden sonraki sonsuz hayata, cennet ve cehenneme inanmak.' },
+                    { principle: '6. Kader ve Kazaya İman', description: 'İyilik ve kötülüğün Allah\'tan geldiğine, her şeyin O\'nun bilgisi dahilinde olduğuna inanmak.' },
+                ]
+            },
+            {
+                type: 'content',
+                title: '1. Allah\'a İnanmak',
+                content: [
+                    '**Allah\'ın Birliği (Tevhid):** Allah birdir ve tektir, eşi ve benzeri yoktur.',
+                    'Her şeyi yaratan, var eden ve yöneten yalnızca O\'dur.',
+                    '"Lâ ilahe illallah Muhammedün resûlullah" (Kelime-i Tevhid) Allah\'ın birliğini ifade eder.',
+                    '"Eşhedü en lâ ilâhe illallah ve eşhedü enne Muhammeden abdühû ve resûlüh" (Kelime-i Şehadet) Müslüman olmanın temelidir.',
+                    '**Allah\'ın Yaratıcılığı ve Kudreti:** Kâinatı ve içindeki her şeyi mükemmel bir uyum içinde yaratan Allah\'tır.',
+                    'İnsanı yoktan var eden, ona akıl, irade, duygu veren O\'dur.',
+                    '**Allah\'ın İsimleri (Esmaü\'l-Hüsna):** Allah\'ın 99 ismi vardır ve O\'nun özellikleri hakkında bilgi verir.',
+                    'Örnek isimler: er-Rahmân, er-Rahîm, el-Ehad, el-Berr, el-Hafîz, el-Alîm, el-Kerîm, el-Adl, er-Rezzâk, el-Kâdir, el-Hâlık, el-Basîr, es-Semî\', el-Vedûd.'
+                ],
+            },
+            {
+                type: 'activity',
+                title: 'Etkinlik: Allah\'a İnanmak',
+                questions: [
+                    {
+                        question: 'Aşağıdaki Allah\'ın isimlerinden hangisi "Bağışlayıp esirgeyen" anlamına gelir?',
+                        options: [
+                            { text: 'el-Alîm', isCorrect: false },
+                            { text: 'er-Rahmân', isCorrect: true },
+                            { text: 'el-Kâdir', isCorrect: false },
+                            { text: 'el-Adl', isCorrect: false },
+                        ],
+                    },
+                    {
+                        question: 'Her şeyi yaratan ve var eden Allah\'ın ismi hangisidir?',
+                        options: [
+                            { text: 'er-Rezzâk', isCorrect: false },
+                            { text: 'el-Hâlık', isCorrect: true },
+                            { text: 'el-Basîr', isCorrect: false },
+                            { text: 'es-Semî\'', isCorrect: false },
+                        ],
+                    },
+                    {
+                        question: 'Kelime-i Tevhid\'in anlamı nedir?',
+                        options: [
+                            { text: 'Allah büyüktür', isCorrect: false },
+                            { text: 'Hamd Allah\'adır', isCorrect: false },
+                            { text: 'Allah\'tan başka ilah yoktur, Muhammed O\'nun elçisidir', isCorrect: true },
+                            { text: 'Allah her şeyi görür', isCorrect: false },
+                        ],
+                    }
+                ]
+            },
+            {
+                type: 'content',
+                title: '2. Meleklere İnanmak',
+                content: [
+                    'Melekler, Allah\'ın emirlerini yerine getiren, nurdan yaratılmış varlıklardır.',
+                    '**Meleklerin Özellikleri:** Gözle görülmezler, cinsiyetleri yoktur, yemeye/içmeye/uyumaya ihtiyaç duymazlar.',
+                    'Asla kötülük yapmaz, günah işlemezler. Gece gündüz Allah\'a ibadet ve dua ederler.',
+                    'İnsanlara yardımcı olurlar, iyilik yapanlar için sevap yazarlar.',
+                    '**Dört Büyük Melek ve Görevleri:**',
+                    '**Cebrail:** Allah\'tan aldığı "vahiy" denilen ayet ve bilgileri peygamberlere getiren melektir.',
+                    '**Mikail:** Yağmur, kar, rüzgâr gibi tabiat olaylarını düzenleyen melektir.',
+                    '**Azrail:** Ömrü biten canlıların ölümüyle görevli melektir.',
+                    '**İsrafil:** Dünya hayatı sona ereceği zaman "Sûr"a üfleyerek bunu insanlara haber verecek olan melektir.'
+                ],
+            },
+            {
+                type: 'activity',
+                title: 'Etkinlik: Meleklere İnanmak',
+                questions: [
+                    {
+                        question: 'Allah\'tan aldığı vahyi peygamberlere getiren melek hangisidir?',
+                        options: [
+                            { text: 'Mikail', isCorrect: false },
+                            { text: 'Cebrail', isCorrect: true },
+                            { text: 'Azrail', isCorrect: false },
+                            { text: 'İsrafil', isCorrect: false },
+                        ],
+                    },
+                    {
+                        question: 'Yağmur, kar ve rüzgar gibi tabiat olaylarını düzenlemekle görevli melek hangisidir?',
+                        options: [
+                            { text: 'Cebrail', isCorrect: false },
+                            { text: 'Azrail', isCorrect: false },
+                            { text: 'Mikail', isCorrect: true },
+                            { text: 'İsrafil', isCorrect: false },
+                        ],
+                    },
+                    {
+                        question: 'Meleklerin özelliklerinden biri hangisidir?',
+                        options: [
+                            { text: 'Yemek yemeleri', isCorrect: false },
+                            { text: 'Gözle görülmeleri', isCorrect: false },
+                            { text: 'Nurdan yaratılmaları', isCorrect: true },
+                            { text: 'Günah işlemeleri', isCorrect: false },
+                        ],
+                    }
+                ]
+            },
+            {
+                type: 'content',
+                title: '3. Kitaplara İnanmak',
+                content: [
+                    'Allah\'ın insanlara doğru yolu göstermek için peygamberler aracılığıyla gönderdiği kutsal kitaplara inanmaktır.',
+                    '**İlahi Kitaplar:**',
+                    '**Tevrat:** Hz. Musa\'ya indirilmiştir.',
+                    '**Zebur:** Hz. Davud\'a indirilmiştir.',
+                    '**İncil:** Hz. İsa\'ya indirilmiştir.',
+                    '**Kur\'an-ı Kerim:** Son peygamber Hz. Muhammed\'e (s.a.s) gönderilmiştir.',
+                    '**Kur\'an-ı Kerim\'in Özellikleri:**',
+                    'Allah\'ın son kitabıdır, tek harfi bile değişmeden günümüze ulaşmıştır ve kıyamete kadar geçerlidir.',
+                    'İçindeki bilgiler bütün insanlar için geçerlidir, okunması ve ezberlenmesi ibadettir.',
+                    'Dili Arapça\'dır. Ramazan ayında, Kadir Gecesi\'nde indirilmeye başlanmıştır.',
+                    'Her bir cümlesine "âyet", ayetlerden oluşan bölümlere "sûre" denir. 114 sûre ve 6236 âyet içerir.',
+                    'İlk sûresi Fatiha, son sûresi Nâs\'tır. En uzun sûresi Bakara, en kısa sûresi Kevser\'dir.',
+                    'Allah\'ı, insanı, kâinatı, inanç ve ibadetleri, güzel ahlakı ve geçmiş kıssaları anlatır.'
+                ],
+            },
+            {
+                type: 'activity',
+                title: 'Etkinlik: Kitaplara İnanmak',
+                questions: [
+                    {
+                        question: 'Tevrat hangi peygambere indirilmiştir?',
+                        options: [
+                            { text: 'Hz. İsa', isCorrect: false },
+                            { text: 'Hz. Davud', isCorrect: false },
+                            { text: 'Hz. Musa', isCorrect: true },
+                            { text: 'Hz. Muhammed', isCorrect: false },
+                        ],
+                    },
+                    {
+                        question: 'Kur\'an-ı Kerim hangi ayda indirilmeye başlanmıştır?',
+                        options: [
+                            { text: 'Şevval', isCorrect: false },
+                            { text: 'Muharrem', isCorrect: false },
+                            { text: 'Ramazan', isCorrect: true },
+                            { text: 'Recep', isCorrect: false },
+                        ],
+                    },
+                    {
+                        question: 'Kur\'an-ı Kerim\'in en uzun suresi hangisidir?',
+                        options: [
+                            { text: 'Fatiha', isCorrect: false },
+                            { text: 'Kevser', isCorrect: false },
+                            { text: 'Bakara', isCorrect: true },
+                            { text: 'Nâs', isCorrect: false },
+                        ],
+                    }
+                ]
+            },
+            {
+                type: 'content',
+                title: '4. Peygamberlere İnanmak',
+                content: [
+                    'Allah\'ın insanlara rehberlik etmesi için görevlendirdiği özel insanlara inanmaktır.',
+                    '**Peygamberlerin Görevi:** İnsanlara hem bu dünyada hem de ahirette mutluluğa ulaşmanın yollarını gösteren rehberlerdir.',
+                    'Hayatın her alanında örnek olurlar, nasıl ibadet edileceğini ve nasıl iyi bir insan olunacağını öğretirler.',
+                    'İnsanları iyiliğe çağırır, kötülüklerden sakındırırlar.',
+                    '**Bazı Peygamber İsimleri (Kur\'an\'da adı geçenlerden):** Hz. Adem (İlk peygamber), Hz. Nuh, Hz. İbrahim, Hz. Musa, Hz. Davud, Hz. İsa, Hz. Muhammed (Son peygamber).',
+                    '**Peygamberlerin Özellikleri:**',
+                    '**Sıdk:** Doğruluk (Daima doğruyu söylerler).',
+                    '**Emanet:** Güvenilir olmak (Asla ihanet etmezler).',
+                    '**Fetânet:** Akıllı olmak (Zeki ve anlayışlıdırlar).',
+                    '**İsmet:** Korunmuş olmak (Günah işlemekten korunmuşlardır).',
+                    '**Tebliğ:** Ulaştırmak (Allah\'tan gelen bilgileri aynen insanlara ulaştırırlar).'
+                ],
+            },
+            {
+                type: 'activity',
+                title: 'Etkinlik: Peygamberlere İnanmak',
+                questions: [
+                    {
+                        question: '"Doğruluk" anlamına gelen peygamber özelliği hangisidir?',
+                        options: [
+                            { text: 'Emanet', isCorrect: false },
+                            { text: 'Fetânet', isCorrect: false },
+                            { text: 'Sıdk', isCorrect: true },
+                            { text: 'Tebliğ', isCorrect: false },
+                        ],
+                    },
+                    {
+                        question: 'Allah\'tan gelen bilgileri insanlara aynen ulaştırma görevine ne denir?',
+                        options: [
+                            { text: 'Sıdk', isCorrect: false },
+                            { text: 'Emanet', isCorrect: false },
+                            { text: 'Tebliğ', isCorrect: true },
+                            { text: 'İsmet', isCorrect: false },
+                        ],
+                    },
+                    {
+                        question: 'Peygamberlerin günah işlemekten korunmuş olma özelliğine ne denir?',
+                        options: [
+                            { text: 'Sıdk', isCorrect: false },
+                            { text: 'Emanet', isCorrect: false },
+                            { text: 'Fetânet', isCorrect: false },
+                            { text: 'İsmet', isCorrect: true },
+                        ],
+                    }
+                ]
+            },
+            {
+                type: 'content',
+                title: '5. Ahiret Gününe İnanmak',
+                content: [
+                    'Ölümden sonra başlayacak olan sonsuz hayata inanmaktır.',
+                    '**Ölüm ve Ahiret Hayatı:** Ölüm bir son değil, yeni ve farklı bir hayatın başlangıcıdır.',
+                    'Ahiret hayatı, dünyada yapılan iyi veya kötü tüm işlerin karşılığının alınacağı yerdir.',
+                    '**Cennet ve Cehennem:**',
+                    'Allah\'a inanan ve iyi işler yapanlar cennete girerler; orada insanın arzu ettiği her türlü güzellik vardır.',
+                    'Allah\'a ve ahiret hayatına inanmayan, kötülükle ömür geçirenler ise cehennemde cezalandırılırlar.'
+                ],
+            },
+            {
+                type: 'activity',
+                title: 'Etkinlik: Ahiret Gününe İnanmak',
+                questions: [
+                    {
+                        question: 'Ölüm, hayatın kesin sonudur. Bu ifade doğru mu yanlış mı?',
+                        options: [
+                            { text: 'Doğru', isCorrect: false },
+                            { text: 'Yanlış', isCorrect: true },
+                        ],
+                    },
+                    {
+                        question: 'Dünyada iyi işler yapanların gideceği yer neresidir?',
+                        options: [
+                            { text: 'Cehennem', isCorrect: false },
+                            { text: 'Sırat', isCorrect: false },
+                            { text: 'Cennet', isCorrect: true },
+                            { text: 'Mahşer', isCorrect: false },
+                        ],
+                    },
+                    {
+                        question: 'Ahiret hayatında dünyadaki amellerin karşılığının alınacağı yerlere ne denir?',
+                        options: [
+                            { text: 'Sırat ve Mizan', isCorrect: false },
+                            { text: 'Cennet ve Cehennem', isCorrect: true },
+                            { text: 'Mahşer ve Kıyamet', isCorrect: false },
+                            { text: 'Berzah ve Haşir', isCorrect: false },
+                        ],
+                    }
+                ]
+            },
+            {
+                type: 'content',
+                title: '6. Kader ve Kazaya İnanmak',
+                content: [
+                    'Allah\'ın her şeyi önceden bilmesine ve bu bilginin zamanı gelince gerçekleşmesine inanmaktır.',
+                    '**Kader:** Allah\'ın, olmuş ve olacak her şeyi önceden bilmesidir.',
+                    '**Kaza:** Olayların vakti gelince Allah\'ın bilgisi dahilinde meydana gelmesidir.',
+                    '**İnsan İradesi ve Sorumluluk:**',
+                    'Kader ve kazaya inanan insan, Allah\'ın her şeyi bildiğine inanır ancak aynı zamanda kendi üzerine düşen sorumluluğu yerine getirmek için çalışır.',
+                    'İyiliğin peşinde koşar ve asla tembellik yapmaz.',
+                    'Başarılı olduğunda Allah\'a şükreder, istediği olmadığında ise asla ümitsizliğe düşmez, daha çok çalışır.'
+                ],
+            },
+            {
+                type: 'activity',
+                title: 'Etkinlik: Kader ve Kazaya İnanmak',
+                questions: [
+                    {
+                        question: 'Olayların vakti gelince Allah\'ın bilgisi dahilinde meydana gelmesine ne denir?',
+                        options: [
+                            { text: 'Kader', isCorrect: false },
+                            { text: 'Kaza', isCorrect: true },
+                            { text: 'İrade', isCorrect: false },
+                            { text: 'Tevekkül', isCorrect: false },
+                        ],
+                    },
+                    {
+                        question: 'Allah\'ın her şeyi önceden bilmesine ne denir?',
+                        options: [
+                            { text: 'Kaza', isCorrect: false },
+                            { text: 'İrade', isCorrect: false },
+                            { text: 'Kader', isCorrect: true },
+                            { text: 'Tevekkül', isCorrect: false },
+                        ],
+                    },
+                    {
+                        question: 'Kader ve kazaya inanan bir kişi nasıl davranmalıdır?',
+                        options: [
+                            { text: 'Tembellik yapmalı', isCorrect: false },
+                            { text: 'Sorumluluklarını ihmal etmeli', isCorrect: false },
+                            { text: 'Çalışmalı ve sorumluluklarını yerine getirmeli', isCorrect: true },
+                            { text: 'Her şeyi şansa bırakmalı', isCorrect: false },
+                        ],
+                    }
+                ]
+            },
+            {
+                type: 'conclusion',
+                title: 'Tebrikler!',
+                content: [
+                    'İnanç konularını başarıyla tamamladın!',
+                    'Bu temel esaslar, İslam dininin ana direkleridir ve hayatımıza yön verir.',
+                    'Daha fazla bilgi edinmek ve ibadetlerini öğrenmek için diğer konuları keşfedebilirsin.'
+                ],
+                buttonText: 'Başa Dön'
+            }
+        ];
+
+        // Function to generate pages with split content and interleaved activities
+        const generatePages = (data) => {
+            const generated = [];
+            const splitThreshold = 6; // Adjusted threshold for 3 parts
+
+            let rawPageIndex = 0;
+            while(rawPageIndex < data.length) {
+                const page = data[rawPageIndex];
+
+                if (page.type === 'content') {
+                    // Find the activity page immediately following this content page in raw data
+                    let activityPage = null;
+                    if (rawPageIndex + 1 < data.length && data[rawPageIndex + 1].type === 'activity') {
+                        activityPage = data[rawPageIndex + 1];
+                    }
+
+                    // Split content into three parts
+                    const partSize = Math.ceil(page.content.length / 3);
+                    const firstThird = page.content.slice(0, partSize);
+                    const secondThird = page.content.slice(partSize, partSize * 2);
+                    const thirdThird = page.content.slice(partSize * 2);
+
+                    // Push first part of content
+                    generated.push({
+                        ...page,
+                        content: firstThird,
+                        title: page.title + ' (Bölüm 1)',
+                        originalTopicTitle: page.title
+                    });
+
+                    // Insert the first activity for this topic (after part 1)
+                    if (activityPage && activityPage.questions && activityPage.questions.length > 0) {
+                        generated.push({
+                            type: 'activity',
+                            title: activityPage.title + ' (Bölüm 1)',
+                            question: activityPage.questions[0].question,
+                            options: activityPage.questions[0].options,
+                            originalTopicTitle: page.title
+                        });
+                    }
+
+                    // Push second part of content
+                    generated.push({
+                        ...page,
+                        content: secondThird,
+                        title: page.title + ' (Bölüm 2)',
+                        originalTopicTitle: page.title
+                    });
+
+                    // Insert the second activity for this topic (after part 2)
+                    if (activityPage && activityPage.questions && activityPage.questions.length > 1) {
+                        generated.push({
+                            type: 'activity',
+                            title: activityPage.title + ' (Bölüm 2)',
+                            question: activityPage.questions[1].question,
+                            options: activityPage.questions[1].options,
+                            originalTopicTitle: page.title
+                        });
+                    }
+
+                    // Push third part of content
+                    generated.push({
+                        ...page,
+                        content: thirdThird,
+                        title: page.title + ' (Bölüm 3)',
+                        originalTopicTitle: page.title
+                    });
+
+                    // Insert the third activity for this topic (after part 3 / end of topic)
+                    if (activityPage && activityPage.questions && activityPage.questions.length > 2) {
+                        generated.push({
+                            type: 'activity',
+                            title: activityPage.title + ' (Bölüm 3)',
+                            question: activityPage.questions[2].question,
+                            options: activityPage.questions[2].options,
+                            originalTopicTitle: page.title
+                        });
+                    }
+
+                    // If an activity was found and inserted, skip it in the raw data iteration
+                    if (activityPage) {
+                        rawPageIndex++; // Skip the original activity page in raw data
+                    }
+
+                } else { // Intro, Conclusion, or Table/Diagram page
+                    generated.push(page);
+                }
+                rawPageIndex++;
+            }
+            return generated;
+        };
+
+        const pages = generatePages(rawPagesData); // Generate pages once
+
+        // Define a set of dark-themed colors for content boxes
+        const contentBoxColors = [
+            'bg-gray-800', // Slightly lighter gray than background for subtle contrast
+            'bg-blue-800', // Muted blue
+            'bg-purple-800', // Muted purple
+            'bg-green-800', // Muted green
+            'bg-indigo-800', // Muted indigo
+            'bg-red-800', // Muted red
+            'bg-yellow-800', // Muted yellow
+            'bg-teal-800', // Muted teal
+            'bg-orange-800', // Muted orange
+            'bg-pink-800' // Muted pink
+        ];
+
+        // Function to render the current page
+        function renderPage() {
+            pageContentDiv.innerHTML = ''; // Clear previous content
+            feedback = ''; // Reset feedback
+            selectedAnswer = null; // Reset selected answer
+
+            const page = pages[currentPageIndex];
+            if (!page) {
+                console.error('Page not found for index:', currentPageIndex);
+                return;
+            }
+
+            if (page.type === 'intro' || page.type === 'conclusion') {
+                const container = document.createElement('div');
+                container.className = 'flex flex-col items-center justify-center h-full p-6 text-center';
+
+                const titleElem = document.createElement('h2');
+                titleElem.className = 'text-4xl font-bold text-blue-400 mb-6 rounded-lg bg-gray-900 p-4 shadow-md';
+                titleElem.textContent = page.title;
+                container.appendChild(titleElem);
+
+                const ulElem = document.createElement('ul');
+                ulElem.className = 'text-xl text-gray-200 space-y-4 mb-8';
+                page.content.forEach((item, index) => {
+                    const liElem = document.createElement('li');
+                    liElem.className = 'bg-gray-800 p-3 rounded-md shadow-sm border border-gray-700';
+                    liElem.textContent = item;
+                    ulElem.appendChild(liElem);
+                });
+                container.appendChild(ulElem);
+
+                const buttonElem = document.createElement('button');
+                buttonElem.className = 'px-8 py-4 bg-green-700 text-white font-semibold rounded-full shadow-lg hover:bg-green-800 transition duration-300 ease-in-out transform hover:scale-105';
+                buttonElem.textContent = page.buttonText;
+                buttonElem.onclick = handleNext;
+                container.appendChild(buttonElem);
+
+                pageContentDiv.appendChild(container);
+
+            } else if (page.type === 'diagram') {
+                const container = document.createElement('div');
+                container.className = 'flex flex-col h-full p-6 items-center justify-center';
+
+                // Central Node
+                const centralNode = document.createElement('div');
+                centralNode.className = 'bg-blue-600 text-white text-2xl font-bold p-4 rounded-full shadow-lg mb-8 w-64 text-center transform transition duration-300 hover:scale-105';
+                centralNode.textContent = 'İnanç Esasları';
+                container.appendChild(centralNode);
+
+                // Principles Grid
+                const principlesGrid = document.createElement('div');
+                principlesGrid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full';
+
+                page.diagramContent.forEach((item, index) => {
+                    const principleBox = document.createElement('div');
+                    principleBox.className = 'bg-gray-800 text-gray-200 p-5 rounded-lg shadow-md border border-gray-700 flex flex-col items-center text-center transform transition duration-300 hover:scale-105 hover:bg-gray-700';
+
+                    const h3Elem = document.createElement('h3');
+                    h3Elem.className = 'text-xl font-semibold text-blue-300 mb-2';
+                    h3Elem.textContent = item.principle;
+                    principleBox.appendChild(h3Elem);
+
+                    const pElem = document.createElement('p');
+                    pElem.className = 'text-sm';
+                    pElem.textContent = item.description;
+                    principleBox.appendChild(pElem);
+
+                    principlesGrid.appendChild(principleBox);
+                });
+                container.appendChild(principlesGrid);
+
+                pageContentDiv.appendChild(container);
+
+            } else if (page.type === 'content') {
+                const container = document.createElement('div');
+                container.className = 'flex flex-col h-full p-6';
+
+                const titleElem = document.createElement('h2');
+                titleElem.className = 'text-3xl font-bold text-blue-400 mb-6 rounded-lg bg-gray-900 p-3 shadow-sm';
+                titleElem.textContent = page.title;
+                container.appendChild(titleElem);
+
+                const ulElem = document.createElement('ul');
+                ulElem.className = 'text-lg text-gray-100 space-y-4 flex-grow overflow-y-auto pr-2';
+                page.content.forEach((item, index) => {
+                    const liElem = document.createElement('li');
+                    liElem.className = `${contentBoxColors[index % contentBoxColors.length]} p-4 rounded-lg shadow-md border border-gray-600`;
+                    liElem.innerHTML = item; // Use innerHTML to allow bold text
+                    ulElem.appendChild(liElem);
+                });
+                container.appendChild(ulElem);
+
+                pageContentDiv.appendChild(container);
+
+            } else if (page.type === 'activity') {
+                const container = document.createElement('div');
+                container.className = 'flex flex-col items-center justify-center h-full p-6 text-center';
+
+                const titleElem = document.createElement('h2');
+                titleElem.className = 'text-3xl font-bold text-purple-400 mb-6 rounded-lg bg-gray-900 p-3 shadow-sm';
+                titleElem.textContent = page.title;
+                container.appendChild(titleElem);
+
+                const questionElem = document.createElement('p');
+                questionElem.className = 'text-2xl text-gray-100 mb-8 font-medium';
+                questionElem.textContent = page.question;
+                container.appendChild(questionElem);
+
+                const optionsGrid = document.createElement('div');
+                optionsGrid.className = 'grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-lg mb-8';
+
+                page.options.forEach((option, index) => {
+                    const buttonElem = document.createElement('button');
+                    buttonElem.textContent = option.text;
+                    buttonElem.className = `
+                        px-6 py-4 text-xl font-semibold rounded-full shadow-md transition duration-300 ease-in-out
+                        ${selectedAnswer === null
+                            ? 'bg-blue-600 text-white hover:bg-blue-700 hover:scale-105'
+                            : option.isCorrect
+                                ? 'bg-green-600 text-white'
+                                : selectedAnswer === index
+                                    ? 'bg-red-600 text-white'
+                                    : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                        }
+                    `;
+                    buttonElem.disabled = selectedAnswer !== null;
+                    buttonElem.onclick = () => handleAnswerClick(option, index);
+                    optionsGrid.appendChild(buttonElem);
+                });
+                container.appendChild(optionsGrid);
+
+                const feedbackElem = document.createElement('p');
+                feedbackElem.id = 'feedback-message';
+                feedbackElem.className = `text-2xl font-bold mt-4 ${feedback.includes('Doğru') ? 'text-green-500' : 'text-red-500'}`;
+                feedbackElem.textContent = feedback;
+                container.appendChild(feedbackElem);
+
+                pageContentDiv.appendChild(container);
+            }
+
+            // Update navigation button states
+            prevButton.disabled = currentPageIndex === 0;
+            nextButton.textContent = currentPageIndex === pages.length - 1 ? 'Başa Dön' : 'Sonraki';
+        }
+
+        // Event handlers
+        function handleNext() {
+            feedback = '';
+            selectedAnswer = null;
+            if (currentPageIndex < pages.length - 1) {
+                currentPageIndex++;
+            } else {
+                currentPageIndex = 0; // Loop back to start
+            }
+            renderPage();
+        }
+
+        function handlePrev() {
+            feedback = '';
+            selectedAnswer = null;
+            if (currentPageIndex > 0) {
+                currentPageIndex--;
+            }
+            renderPage();
+        }
+
+        function handleAnswerClick(option, index) {
+            if (selectedAnswer !== null) return; // Prevent multiple clicks
+            selectedAnswer = index;
+            if (option.isCorrect) {
+                feedback = 'Doğru! Harika.';
+            } else {
+                feedback = 'Yanlış cevap. Tekrar dene!';
+            }
+            // Re-render the activity page to show feedback and disable buttons
+            renderPage();
+        }
+
+        // Attach event listeners to navigation buttons
+        prevButton.addEventListener('click', handlePrev);
+        nextButton.addEventListener('click', handleNext);
+
+        // Initial render on page load
+        document.addEventListener('DOMContentLoaded', renderPage);
+    </script>
+</body>
+</html>
