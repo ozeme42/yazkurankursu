@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ahlak Konuları İnteraktif Infografik</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Inter font import */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for content overflow */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #374151; /* gray-700 */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4B5563; /* gray-600 */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6B7280; /* gray-500 */
+        }
+        /* Styles for the custom message box */
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #1f2937; /* gray-800 */
+            color: #f9fafb; /* gray-50 */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            text-align: center;
+            max-width: 300px;
+            border: 1px solid #4b5563; /* gray-600 */
+        }
+        .message-box button {
+            background-color: #3b82f6; /* blue-500 */
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            margin-top: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .message-box button:hover {
+            background-color: #2563eb; /* blue-600 */
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center">
+    <div id="app-container" class="bg-gray-800 rounded-none shadow-none p-6 w-full h-screen flex flex-col">
+        <div id="page-content" class="flex-grow flex items-center justify-center">
+            <!-- Page content will be rendered here by JavaScript -->
+        </div>
+
+        <div class="flex justify-between mt-6 p-4 border-t border-gray-700">
+            <button id="prev-button" class="px-6 py-3 bg-gray-700 text-gray-200 font-semibold rounded-full shadow-md hover:bg-gray-600 disabled:opacity-50 transition duration-300 ease-in-out transform hover:scale-105">
+                Önceki
+            </button>
+            <!-- Fullscreen button added here -->
+            <button id="fullscreen-button" class="px-6 py-3 bg-purple-600 text-white font-semibold rounded-full shadow-md hover:bg-purple-700 transition duration-300 ease-in-out transform hover:scale-105">
+                Tam Ekran
+            </button>
+            <button id="next-button" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-full shadow-md hover:bg-blue-700 transition duration-300 ease-in-out transform hover:scale-105">
+                Sonraki
+            </button>
+        </div>
+    </div>
+
+    <!-- Custom message box for fullscreen error -->
+    <div id="fullscreen-message-box" class="message-box">
+        <p>Uyarı: Bu bir örnek mesaj kutusudur. Tam ekran işlevi, tarayıcı güvenlik politikaları nedeniyle iframe ortamında doğrudan çalışmayabilir.</p>
+        <button onclick="document.getElementById('fullscreen-message-box').style.display = 'none';">Tamam</button>
+    </div>
+
+    <script>
+        // Global state variables
+        let currentPageIndex = 0;
+        let feedback = '';
+        let selectedAnswer = null;
+
+        // DOM elements
+        const pageContentDiv = document.getElementById('page-content');
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+        const fullscreenButton = document.getElementById('fullscreen-button'); // Get fullscreen button
+        const fullscreenMessageBox = document.getElementById('fullscreen-message-box'); // Get message box
+
+        // Raw data for pages, now fully structured and ordered for Ahlak Konuları
+        const rawPagesData = [
+            {
+                type: 'intro',
+                title: 'Ahlak Konularına Hoş Geldiniz!',
+                content: [
+                    'Bu bölümde güzel ahlakın ne anlama geldiğini ve hayatımızdaki önemini öğreneceğiz.',
+                    'Ahlak, bizi iyi insan yapan davranışlar bütünüdür.',
+                    'Peygamberimizin (s.a.s.) örnek ahlakını tanıyacak ve hayatımıza katmaya çalışacağız.'
+                ],
+                buttonText: 'Başlayalım!'
+            },
+            // --- 1. Ahlak Nedir ve Neden Önemlidir? ---
+            {
+                type: 'content',
+                title: '1. Ahlak Nedir?',
+                content: [
+                    'Ahlak, insanın iyi ve güzel davranışlar sergilemesini sağlayan huyları ve karakteridir.',
+                    'İslam dini, güzel ahlaka büyük önem verir. Peygamberimiz (s.a.s.) "Ben güzel ahlakı tamamlamak için gönderildim." buyurmuştur.',
+                    'Ahlaklı olmak, hem Allah katında hem de insanlar arasında değerli olmaktır.'
+                ],
+                originalTopicTitle: '1. Ahlak Nedir ve Neden Önemlidir?'
+            },
+            {
+                type: 'activity',
+                title: 'Etkinlik: Ahlakın Tanımı',
+                question: 'Peygamberimiz (s.a.s.) neden gönderildiğini belirtirken neyi vurgulamıştır?',
+                options: [
+                    { text: 'Savaşmayı öğretmek için', isCorrect: false },
+                    { text: 'Zengin olmak için', isCorrect: false },
+                    { text: 'Güzel ahlakı tamamlamak için', isCorrect: true },
+                    { text: 'Sadece namaz kılmak için', isCorrect: false },
+                ],
+                originalTopicTitle: '1. Ahlak Nedir ve Neden Önemlidir?'
+            },
+            // --- 2. Dürüstlük ve Doğruluk ---
+            {
+                type: 'content',
+                title: '2. Dürüstlük ve Doğruluk (Sıdk)',
+                content: [
+                    'Dürüstlük, sözde ve davranışta doğru olmaktır. Yalan söylememek, verdiğimiz sözleri tutmak dürüstlüğün temelidir.',
+                    'Peygamberimiz (s.a.s.) hayatı boyunca dürüstlüğüyle tanınmış, ona "Muhammedü\'l-Emin" (Güvenilir Muhammed) denilmiştir.',
+                    'Dürüst insanlar hem Allah\'ın rızasını kazanır hem de toplumda sevilir ve sayılır.'
+                ],
+                originalTopicTitle: '2. Dürüstlük ve Doğruluk'
+            },
+            {
+                type: 'activity',
+                title: 'Etkinlik: Dürüstlük',
+                question: 'Peygamberimize verilen "Muhammedü\'l-Emin" lakabı ne anlama gelir?',
+                options: [
+                    { text: 'Cesur Muhammed', isCorrect: false },
+                    { text: 'Akıllı Muhammed', isCorrect: false },
+                    { text: 'Güvenilir Muhammed', isCorrect: true },
+                    { text: 'Cömert Muhammed', isCorrect: false },
+                ],
+                originalTopicTitle: '2. Dürüstlük ve Doğruluk'
+            },
+            // --- 3. Adalet ---
+            {
+                type: 'content',
+                title: '3. Adalet',
+                content: [
+                    'Adalet, her hak sahibine hakkını vermek, haksızlık yapmamak ve eşit davranmaktır.',
+                    'Allah, Kur\'an-ı Kerim\'de adaleti emretmiştir. Peygamberimiz de hayatında adaletten asla ayrılmamıştır.',
+                    'Adaletli olmak, hem bireysel hem de toplumsal huzur için çok önemlidir.'
+                ],
+                originalTopicTitle: '3. Adalet'
+            },
+            {
+                type: 'activity',
+                title: 'Etkinlik: Adalet',
+                question: 'Adaletli olmak ne anlama gelir?',
+                options: [
+                    { text: 'Sadece kendi hakkını düşünmek', isCorrect: false },
+                    { text: 'Her hak sahibine hakkını vermek', isCorrect: true },
+                    { text: 'Güçlünün yanında olmak', isCorrect: false },
+                    { text: 'Kurallara uymamak', isCorrect: false },
+                ],
+                originalTopicTitle: '3. Adalet'
+            },
+            // --- 4. Merhamet ve Şefkat ---
+            {
+                type: 'content',
+                title: '4. Merhamet ve Şefkat',
+                content: [
+                    'Merhamet, canlılara acımak, onlara şefkat göstermek ve yardım etmektir.',
+                    'Peygamberimiz (s.a.s.) "Merhamet etmeyene merhamet olunmaz." buyurmuştur.',
+                    'Sadece insanlara değil, hayvanlara ve bitkilere karşı da merhametli olmalıyız. Bu, Allah\'ın bize verdiği nimetlere şükrün bir göstergesidir.'
+                ],
+                originalTopicTitle: '4. Merhamet ve Şefkat'
+            },
+            {
+                type: 'activity',
+                title: 'Etkinlik: Merhamet',
+                question: 'Peygamberimizin "Merhamet etmeyene merhamet olunmaz." sözü neyi vurgular?',
+                options: [
+                    { text: 'Sadece güçlüye merhamet etmeyi', isCorrect: false },
+                    { text: 'Merhametli olmanın önemini', isCorrect: true },
+                    { text: 'Merhametin gereksiz olduğunu', isCorrect: false },
+                    { text: 'Sadece insanlara merhamet etmeyi', isCorrect: false },
+                ],
+                originalTopicTitle: '4. Merhamet ve Şefkat'
+            },
+            // --- 5. Saygı ve Hoşgörü ---
+            {
+                type: 'content',
+                title: '5. Saygı ve Hoşgörü',
+                content: [
+                    'Saygı, başkalarına değer vermek, onların haklarına riayet etmek ve nezaketle davranmaktır.',
+                    'Büyüklerimize saygı göstermek, küçüklerimize şefkat göstermek dinimizin emridir.',
+                    'Hoşgörü, farklı düşüncelere, inançlara ve yaşam tarzlarına saygı duymak, insanları olduğu gibi kabul etmektir.',
+                    'Peygamberimiz (s.a.s.) farklı inançtan insanlara karşı bile hoşgörülü davranmıştır.'
+                ],
+                originalTopicTitle: '5. Saygı ve Hoşgörü'
+            },
+            {
+                type: 'activity',
+                title: 'Etkinlik: Saygı ve Hoşgörü',
+                question: 'Farklı düşüncelere ve inançlara saygı duymaya ne denir?',
+                options: [
+                    { text: 'Cimrilik', isCorrect: false },
+                    { text: 'Tembellik', isCorrect: false },
+                    { text: 'Hoşgörü', isCorrect: true },
+                    { text: 'Kıskançlık', isCorrect: false },
+                ],
+                originalTopicTitle: '5. Saygı ve Hoşgörü'
+            },
+            // --- 6. Sorumluluk Bilinci ---
+            {
+                type: 'content',
+                title: '6. Sorumluluk Bilinci',
+                content: [
+                    'Sorumluluk, yaptığımız işlerin sonuçlarını üstlenmek ve görevlerimizi yerine getirmektir.',
+                    'Hem kendimize, hem ailemize, hem topluma, hem de çevreye karşı sorumluluklarımız vardır.',
+                    'Öğrenciler olarak derslerimize çalışmak, evlat olarak anne babamıza yardım etmek, vatandaş olarak kurallara uymak birer sorumluluktur.',
+                    'Çevremizi temiz tutmak, doğal kaynakları israf etmemek de önemli sorumluluklarımızdandır.'
+                ],
+                originalTopicTitle: '6. Sorumluluk Bilinci'
+            },
+            {
+                type: 'activity',
+                title: 'Etkinlik: Sorumluluk',
+                question: 'Aşağıdakilerden hangisi bir öğrencinin sorumluluğu değildir?',
+                options: [
+                    { text: 'Derslerine çalışmak', isCorrect: false },
+                    { text: 'Okul kurallarına uymak', isCorrect: false },
+                    { text: 'Okulu kirletmek', isCorrect: true },
+                    { text: 'Öğretmenlerini dinlemek', isCorrect: false },
+                ],
+                originalTopicTitle: '6. Sorumluluk Bilinci'
+            },
+            {
+                type: 'conclusion',
+                title: 'Ahlak Konularını Tamamladın!',
+                content: [
+                    'Güzel ahlakın temel prensiplerini öğrendin.',
+                    'Bu değerleri hayatına katarak hem iyi bir Müslüman hem de örnek bir insan olabilirsin.',
+                    'Ahlaklı olmak, dünya ve ahiret mutluluğunun anahtarıdır.'
+                ],
+                buttonText: 'Başa Dön'
+            }
+        ];
+
+        // Function to generate pages: Now simply returns the pre-structured rawPagesData
+        const generatePages = (data) => {
+            return data;
+        };
+
+        const pages = generatePages(rawPagesData); // Generate pages once
+
+        // Define a set of dark-themed colors for content boxes
+        const contentBoxColors = [
+            'bg-gray-800', // Slightly lighter gray than background for subtle contrast
+            'bg-blue-800', // Muted blue
+            'bg-purple-800', // Muted purple
+            'bg-green-800', // Muted green
+            'bg-indigo-800', // Muted indigo
+            'bg-red-800', // Muted red
+            'bg-yellow-800', // Muted yellow
+            'bg-teal-800', // Muted teal
+            'bg-orange-800', // Muted orange
+            'bg-pink-800' // Muted pink
+        ];
+
+        // Function to render the current page
+        function renderPage() {
+            pageContentDiv.innerHTML = ''; // Clear previous content
+            feedback = ''; // Reset feedback when rendering a new page
+            selectedAnswer = null; // Reset selected answer when rendering a new page
+
+            const page = pages[currentPageIndex];
+            if (!page) {
+                console.error('Page not found for index:', currentPageIndex);
+                return;
+            }
+
+            if (page.type === 'intro' || page.type === 'conclusion') {
+                const container = document.createElement('div');
+                container.className = 'flex flex-col items-center justify-center h-full p-6 text-center';
+
+                const titleElem = document.createElement('h2');
+                titleElem.className = 'text-4xl font-bold text-blue-400 mb-6 rounded-lg bg-gray-900 p-4 shadow-md';
+                titleElem.textContent = page.title;
+                container.appendChild(titleElem);
+
+                const ulElem = document.createElement('ul');
+                ulElem.className = 'text-xl text-gray-200 space-y-4 mb-8';
+                page.content.forEach((item, index) => {
+                    const liElem = document.createElement('li');
+                    liElem.className = 'bg-gray-800 p-3 rounded-md shadow-sm border border-gray-700';
+                    liElem.textContent = item;
+                    ulElem.appendChild(liElem);
+                });
+                container.appendChild(ulElem);
+
+                const buttonElem = document.createElement('button');
+                buttonElem.className = 'px-8 py-4 bg-green-700 text-white font-semibold rounded-full shadow-lg hover:bg-green-800 transition duration-300 ease-in-out transform hover:scale-105';
+                buttonElem.textContent = page.buttonText;
+                buttonElem.onclick = handleNext;
+                container.appendChild(buttonElem);
+
+                pageContentDiv.appendChild(container);
+
+            } else if (page.type === 'content') {
+                const container = document.createElement('div');
+                container.className = 'flex flex-col items-center justify-center h-full p-6';
+
+                const titleElem = document.createElement('h2');
+                titleElem.className = 'text-3xl font-bold text-blue-400 mb-6 rounded-lg bg-gray-900 p-3 shadow-sm';
+                titleElem.textContent = page.title;
+                container.appendChild(titleElem);
+
+                const ulElem = document.createElement('ul');
+                ulElem.className = 'text-lg text-gray-100 space-y-4 flex-grow overflow-y-auto pr-2';
+                page.content.forEach((item, index) => {
+                    const liElem = document.createElement('li');
+                    liElem.className = `${contentBoxColors[index % contentBoxColors.length]} p-4 rounded-lg shadow-md border border-gray-600 text-center`;
+                    liElem.innerHTML = item; // Use innerHTML to allow bold text
+                    ulElem.appendChild(liElem);
+                });
+                container.appendChild(ulElem);
+
+                pageContentDiv.appendChild(container);
+
+            } else if (page.type === 'activity') {
+                const container = document.createElement('div');
+                container.className = 'flex flex-col items-center justify-center h-full p-6 text-center';
+
+                const titleElem = document.createElement('h2');
+                titleElem.className = 'text-3xl font-bold text-purple-400 mb-6 rounded-lg bg-gray-900 p-3 shadow-sm';
+                titleElem.textContent = page.title;
+                container.appendChild(titleElem);
+
+                const questionElem = document.createElement('p');
+                questionElem.className = 'text-2xl text-gray-100 mb-8 font-medium';
+                questionElem.textContent = page.question;
+                container.appendChild(questionElem);
+
+                const optionsGrid = document.createElement('div');
+                optionsGrid.className = 'grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-lg mb-8';
+
+                page.options.forEach((option, index) => {
+                    const buttonElem = document.createElement('button');
+                    buttonElem.textContent = option.text;
+                    buttonElem.className = `
+                        px-6 py-4 text-xl font-semibold rounded-full shadow-md transition duration-300 ease-in-out
+                        ${selectedAnswer === null
+                            ? 'bg-blue-600 text-white hover:bg-blue-700 hover:scale-105'
+                            : option.isCorrect
+                                ? 'bg-green-600 text-white'
+                                : selectedAnswer === index
+                                    ? 'bg-red-600 text-white'
+                                    : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                        }
+                    `;
+                    buttonElem.disabled = selectedAnswer !== null;
+                    buttonElem.onclick = () => handleAnswerClick(option, index);
+                    optionsGrid.appendChild(buttonElem);
+                });
+                container.appendChild(optionsGrid);
+
+                const feedbackElem = document.createElement('p');
+                feedbackElem.id = 'feedback-message';
+                feedbackElem.className = `text-2xl font-bold mt-4 ${feedback.includes('Doğru') ? 'text-green-500' : 'text-red-500'}`;
+                feedbackElem.textContent = feedback;
+                container.appendChild(feedbackElem);
+
+                pageContentDiv.appendChild(container);
+            }
+
+            // Update navigation button states
+            prevButton.disabled = currentPageIndex === 0;
+            nextButton.textContent = currentPageIndex === pages.length - 1 ? 'Başa Dön' : 'Sonraki';
+        }
+
+        // Event handlers
+        function handleNext() {
+            feedback = ''; // Reset feedback when navigating
+            selectedAnswer = null; // Reset selected answer when navigating
+            if (currentPageIndex < pages.length - 1) {
+                currentPageIndex++;
+            } else {
+                currentPageIndex = 0; // Loop back to start
+            }
+            renderPage();
+        }
+
+        function handlePrev() {
+            feedback = ''; // Reset feedback when navigating
+            selectedAnswer = null; // Reset selected answer when navigating
+            if (currentPageIndex > 0) {
+                currentPageIndex--;
+            }
+            renderPage();
+        }
+
+        function handleAnswerClick(option, index) {
+            if (selectedAnswer !== null) return; // Prevent multiple clicks
+            selectedAnswer = index;
+            if (option.isCorrect) {
+                feedback = 'Doğru! Harika.';
+            } else {
+                feedback = 'Yanlış cevap. Tekrar dene!';
+            }
+            // Re-render the activity page to show feedback and disable buttons
+            renderPage();
+        }
+
+        // Fullscreen functionality
+        function toggleFullscreen() {
+            const appContainer = document.getElementById('app-container');
+            if (!document.fullscreenElement) {
+                if (appContainer.requestFullscreen) {
+                    appContainer.requestFullscreen();
+                } else if (appContainer.webkitRequestFullscreen) { /* Safari */
+                    appContainer.webkitRequestFullscreen();
+                } else if (appContainer.msRequestFullscreen) { /* IE11 */
+                    appContainer.msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) { /* Safari */
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) { /* IE11 */
+                    document.msExitFullscreen();
+                }
+            }
+        }
+
+        // Attach event listeners to navigation and fullscreen buttons
+        prevButton.addEventListener('click', handlePrev);
+        nextButton.addEventListener('click', handleNext);
+        fullscreenButton.addEventListener('click', toggleFullscreen);
+
+        // Initial render on page load
+        document.addEventListener('DOMContentLoaded', renderPage);
+    </script>
+</body>
+</html>
