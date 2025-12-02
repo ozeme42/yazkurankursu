@@ -279,7 +279,7 @@
 
         <div class="controls">
             <button class="btn btn-secondary" onclick="goHome()">Çıkış</button>
-            <button class="btn" id="next-btn" onclick="nextQuestion()" disabled>Sonraki Soru ➡️</button>
+            <button class="btn" id="next-btn" onclick="nextQuestion()">Sonraki Soru ➡️</button>
         </div>
     </div>
 
@@ -488,8 +488,8 @@
         container.innerHTML = '';
         
         const nextBtn = document.getElementById('next-btn');
-        // Yeni soruya geçince butonu pasif yap
-        nextBtn.disabled = true;
+        // Yeni soruya geçince butonu her zaman aktif bırak
+        nextBtn.disabled = false;
         if (questionIndex === currentQuestions.length - 1) {
             nextBtn.textContent = "Sınavı Bitir 🏁";
         } else {
@@ -504,7 +504,6 @@
             // Eğer daha önce cevaplandıysa (geri gelme durumu olursa diye) işaretli göster
             if (userAnswers[questionIndex] === index) {
                 btn.classList.add('selected');
-                nextBtn.disabled = false;
             }
 
             btn.onclick = () => selectOption(index, btn);
