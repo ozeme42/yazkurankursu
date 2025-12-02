@@ -3,23 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>4. Sınıf Zorlayıcı Deneme Sınavı</title>
+    <title>4. Sınıf Yeni Nesil Deneme Sınavı</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
 
         :root {
-            --primary: #D946EF; /* Daha canlı bir mor/pembe tonu */
-            --secondary: #8B5CF6;
-            --background: #F0F9FF;
+            --primary: #6366F1; /* İndigo */
+            --secondary: #EC4899; /* Pembe */
+            --accent: #F59E0B; /* Turuncu */
+            --background: #EEF2FF;
             --card-bg: #FFFFFF;
-            --text: #1E293B;
-            --correct: #22C55E;
-            --wrong: #EF4444;
+            --text: #1F2937;
         }
 
         body {
             font-family: 'Nunito', sans-serif;
             background-color: var(--background);
+            background-image: radial-gradient(#E0E7FF 2px, transparent 2px);
+            background-size: 30px 30px;
             margin: 0;
             padding: 0;
             display: flex;
@@ -34,14 +35,15 @@
             width: 95%;
             max-width: 900px;
             background: var(--card-bg);
-            border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border-radius: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
             padding: 30px;
-            min-height: 600px;
+            min-height: 650px;
             display: flex;
             flex-direction: column;
             position: relative;
             overflow: hidden;
+            border: 4px solid #ffffff;
         }
 
         /* --- ANA MENÜ --- */
@@ -55,77 +57,64 @@
         }
 
         h1 {
-            color: var(--secondary);
-            font-size: 2.8rem;
+            color: var(--primary);
+            font-size: 3rem;
             margin-bottom: 10px;
             font-weight: 900;
+            text-shadow: 2px 2px 0px rgba(99, 102, 241, 0.1);
         }
 
-        .badge-hard {
-            background: #F43F5E;
+        .badge-new {
+            background: var(--secondary);
             color: white;
-            padding: 5px 15px;
-            border-radius: 15px;
-            font-size: 1rem;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 1.1rem;
             vertical-align: middle;
             margin-left: 10px;
-            box-shadow: 0 4px 10px rgba(244, 63, 94, 0.4);
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);
+            transform: rotate(-5deg);
+            display: inline-block;
         }
 
         p.subtitle {
-            font-size: 1.3rem;
-            color: #64748B;
-            margin-bottom: 40px;
+            font-size: 1.4rem;
+            color: #6B7280;
+            margin-bottom: 50px;
         }
 
         .subject-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 25px;
             padding: 10px;
         }
 
         .subject-card {
             background: white;
-            border: 2px solid #E2E8F0;
-            border-radius: 20px;
-            padding: 25px;
+            border: 3px solid #E5E7EB;
+            border-radius: 24px;
+            padding: 30px;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             font-weight: 800;
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 120px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            min-height: 140px;
             position: relative;
             overflow: hidden;
         }
 
-        .subject-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 6px;
-        }
-
         .subject-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
-            border-color: transparent;
+            transform: translateY(-10px) scale(1.02);
+            border-color: var(--primary);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
 
-        /* Ders Renkleri */
-        .turkce::before { background: #EF4444; } .turkce { color: #EF4444; }
-        .matematik::before { background: #3B82F6; } .matematik { color: #3B82F6; }
-        .fen::before { background: #10B981; } .fen { color: #10B981; }
-        .sosyal::before { background: #F59E0B; } .sosyal { color: #F59E0B; }
-        .ingilizce::before { background: #8B5CF6; } .ingilizce { color: #8B5CF6; }
-        .din::before { background: #06B6D4; } .din { color: #06B6D4; }
+        .subject-icon { font-size: 2.5rem; margin-bottom: 10px; }
 
         /* --- SINAV EKRANI --- */
         #quiz-screen {
@@ -138,22 +127,26 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #F1F5F9;
+            padding-bottom: 25px;
+            border-bottom: 3px solid #F3F4F6;
             margin-bottom: 30px;
         }
 
-        .subject-title {
-            font-size: 1.5rem;
+        .subject-badge {
+            background: #EEF2FF;
+            color: var(--primary);
+            padding: 10px 25px;
+            border-radius: 15px;
             font-weight: 900;
+            font-size: 1.2rem;
         }
 
-        .progress-container {
-            background: #F1F5F9;
-            border-radius: 10px;
-            padding: 5px 15px;
+        .progress-indicator {
+            background: #F3F4F6;
+            padding: 10px 20px;
+            border-radius: 50px;
             font-weight: 700;
-            color: #64748B;
+            color: #6B7280;
         }
 
         .question-text {
@@ -161,71 +154,71 @@
             font-weight: 800;
             margin-bottom: 40px;
             line-height: 1.6;
-            color: #334155;
+            color: #111827;
         }
 
         .options-grid {
             display: grid;
-            gap: 15px;
+            gap: 18px;
         }
 
         .option-btn {
             background: white;
-            border: 3px solid #E2E8F0;
-            padding: 20px 25px;
-            border-radius: 16px;
-            font-size: 1.2rem;
+            border: 3px solid #E5E7EB;
+            padding: 22px 30px;
+            border-radius: 18px;
+            font-size: 1.25rem;
             text-align: left;
             cursor: pointer;
             transition: all 0.2s;
-            font-weight: 600;
-            color: #475569;
+            font-weight: 700;
+            color: #4B5563;
             position: relative;
         }
 
-        .option-btn:hover:not(.disabled) {
-            background: #F8FAFC;
-            border-color: var(--secondary);
-            transform: translateX(5px);
+        .option-btn:hover {
+            background: #F9FAFB;
+            border-color: #9CA3AF;
         }
 
-        /* --- Sınav Modu İşaretleme Stili (Mavi/Nötr) --- */
+        /* SEÇİLMİŞ ŞIK (NÖTR - MAVİ) */
         .option-btn.selected {
             background-color: #EEF2FF;
-            border-color: var(--secondary);
-            color: var(--secondary);
-            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
         }
 
         .controls {
             margin-top: auto;
             display: flex;
             justify-content: flex-end;
-            gap: 15px;
-            padding-top: 30px;
+            gap: 20px;
+            padding-top: 40px;
         }
 
         .btn {
-            background: var(--secondary);
+            background: var(--primary);
             color: white;
             border: none;
-            padding: 15px 35px;
-            border-radius: 14px;
-            font-size: 1.1rem;
+            padding: 16px 40px;
+            border-radius: 16px;
+            font-size: 1.2rem;
             font-weight: 800;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
-            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+            transition: transform 0.2s;
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+        .btn:hover { transform: translateY(-3px); }
+        .btn:active { transform: scale(0.96); }
+        
+        .btn-secondary { 
+            background: white; 
+            color: #6B7280; 
+            border: 2px solid #E5E7EB;
+            box-shadow: none;
         }
-
-        .btn:active { transform: scale(0.98); }
-        .btn-secondary { background: #94A3B8; box-shadow: none; }
-        .btn-secondary:hover { background: #64748B; }
 
         /* --- SONUÇ EKRANI --- */
         #result-screen {
@@ -237,40 +230,49 @@
             text-align: center;
         }
 
-        .score-card {
-            background: white;
-            border-radius: 30px;
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            margin-bottom: 30px;
-            border: 2px solid #F1F5F9;
-        }
-
         .score-circle {
-            width: 180px;
-            height: 180px;
+            width: 220px;
+            height: 220px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
-            box-shadow: 0 15px 30px rgba(139, 92, 246, 0.4);
+            margin-bottom: 40px;
+            box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.4);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .score-number { font-size: 4rem; font-weight: 900; line-height: 1; }
-        .score-label { font-size: 1.2rem; opacity: 0.9; font-weight: 600; }
+        @keyframes popIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
 
-        .feedback-title { font-size: 2rem; font-weight: 900; color: #1E293B; margin-bottom: 10px; }
-        .feedback-msg { font-size: 1.2rem; color: #64748B; margin-bottom: 0; }
+        .score-number { font-size: 5rem; font-weight: 900; line-height: 1; }
+        .score-label { font-size: 1.5rem; opacity: 0.9; font-weight: 700; margin-top: 5px; }
+
+        .feedback-text { font-size: 2rem; font-weight: 900; color: #1F2937; margin-bottom: 10px; }
+        .feedback-sub { font-size: 1.3rem; color: #6B7280; margin-bottom: 40px; }
+
+        .confetti {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background-color: #f00;
+            animation: fall linear forwards;
+            z-index: 50;
+        }
+
+        @keyframes fall { to { transform: translateY(100vh) rotate(720deg); } }
 
         @media (max-width: 600px) {
-            h1 { font-size: 2rem; }
-            .question-text { font-size: 1.2rem; }
-            .container { padding: 20px; border-radius: 0; min-height: 100vh; }
-            .option-btn { padding: 15px; font-size: 1rem; }
+            h1 { font-size: 2.2rem; }
+            .badge-new { font-size: 0.9rem; padding: 5px 12px; }
+            .container { padding: 20px; height: 100vh; border-radius: 0; border: none; }
+            .question-text { font-size: 1.3rem; }
+            .option-btn { font-size: 1.1rem; padding: 18px; }
         }
     </style>
 </head>
@@ -279,107 +281,122 @@
 <div class="container">
     <!-- ANA MENÜ -->
     <div id="home-screen">
-        <h1>🧠 Zorlayıcı Deneme <span class="badge-hard">ZOR</span></h1>
-        <p class="subtitle">Her dersten 5 seçkin soru. Kendine güveniyor musun?</p>
+        <h1>Yeni Nesil Deneme <span class="badge-new">YENİ</span></h1>
+        <p class="subtitle">Mantık, muhakeme ve günlük hayat soruları. Hazır mısın?</p>
+        
         <div class="subject-grid">
-            <div class="subject-card turkce" onclick="startQuiz('turkce')">📚 Türkçe</div>
-            <div class="subject-card matematik" onclick="startQuiz('matematik')">🧮 Matematik</div>
-            <div class="subject-card fen" onclick="startQuiz('fen')">🧪 Fen Bilimleri</div>
-            <div class="subject-card sosyal" onclick="startQuiz('sosyal')">🌍 Sosyal Bilgiler</div>
-            <div class="subject-card ingilizce" onclick="startQuiz('ingilizce')">🇬🇧 İngilizce</div>
-            <div class="subject-card din" onclick="startQuiz('din')">🕌 Din Kültürü</div>
+            <div class="subject-card" onclick="startQuiz('turkce')">
+                <span class="subject-icon">📚</span>
+                TÜRKÇE
+            </div>
+            <div class="subject-card" onclick="startQuiz('matematik')">
+                <span class="subject-icon">🧮</span>
+                MATEMATİK
+            </div>
+            <div class="subject-card" onclick="startQuiz('fen')">
+                <span class="subject-icon">🧪</span>
+                FEN BİLİMLERİ
+            </div>
+            <div class="subject-card" onclick="startQuiz('sosyal')">
+                <span class="subject-icon">🌍</span>
+                SOSYAL BİLGİLER
+            </div>
+            <div class="subject-card" onclick="startQuiz('ingilizce')">
+                <span class="subject-icon">🇬🇧</span>
+                İNGİLİZCE
+            </div>
+            <div class="subject-card" onclick="startQuiz('din')">
+                <span class="subject-icon">🕌</span>
+                DİN KÜLTÜRÜ
+            </div>
         </div>
     </div>
 
     <!-- SINAV EKRANI -->
     <div id="quiz-screen">
         <div class="quiz-header">
-            <div class="subject-title" id="subject-title">DERS ADI</div>
-            <div class="progress-container">Soru <span id="q-current">1</span> / <span id="q-total">5</span></div>
+            <div class="subject-badge" id="subject-badge">DERS ADI</div>
+            <div class="progress-indicator">Soru <span id="q-current">1</span> / 5</div>
         </div>
         
         <div class="question-text" id="question-text">
-            <!-- Soru Metni Buraya -->
+            Soru buraya gelecek...
         </div>
 
         <div class="options-grid" id="options-container">
-            <!-- Şıklar Buraya -->
+            <!-- Şıklar -->
         </div>
 
         <div class="controls">
             <button class="btn btn-secondary" onclick="goHome()">Çıkış</button>
-            <button class="btn" id="next-btn" onclick="nextQuestion()">Sonraki ➡️</button>
+            <button class="btn" id="next-btn" onclick="nextQuestion()">Sonraki Soru ➡️</button>
         </div>
     </div>
 
     <!-- SONUÇ EKRANI -->
     <div id="result-screen">
-        <div class="score-card">
-            <div class="score-circle">
-                <span class="score-number" id="final-score">0</span>
-                <span class="score-label">DOĞRU</span>
-            </div>
-            <div class="feedback-title" id="feedback-title">Sonuç</div>
-            <p class="feedback-msg" id="feedback-msg">Değerlendirme...</p>
+        <div class="score-circle">
+            <span class="score-number" id="final-score">0</span>
+            <span class="score-label">DOĞRU</span>
         </div>
+        <div class="feedback-text" id="feedback-title">Harika!</div>
+        <p class="feedback-sub" id="feedback-msg">Yeni nesil sorularda çok iyisin.</p>
         <button class="btn" onclick="goHome()">Ana Menüye Dön</button>
     </div>
 </div>
 
 <script>
-    // --- SORU HAVUZU (HER DERSTEN 5 ZOR SORU) ---
+    // --- YENİ NESİL SORU HAVUZU ---
     const quizData = {
         turkce: [
-            { q: "Aşağıdaki cümlelerin hangisinde 'ince' kelimesi, 'Arkadaşımın bu davranışı çok inceydi.' cümlesindeki anlamıyla (mecaz) kullanılmıştır?", o: ["Annem ince iplikle düğmeyi dikti.", "Yolun kenarındaki ince ağaç kırıldı.", "Bize hediye alması çok ince bir hareketti.", "İnce bir dilim pasta istedi."], a: 2 },
-            { q: "Bir yazar: 'Kitaplar, hiç gitmediğiniz şehirlere bilet almadan gitmenizi sağlayan uçaklardır.' demiştir. Yazarın asıl anlatmak istediği nedir?", o: ["Kitaplarda uçak resimleri vardır.", "Kitap okumak hayal gücüyle bizi farklı dünyalara götürür.", "Uçakta kitap okumak gerekir.", "Kitaplar uçak biletinden ucuzdur."], a: 1 },
-            { q: "'Göz' kelimesi aşağıdakilerin hangisinde deyim içinde KULLANILMAMIŞTIR?", o: ["Öğretmenin gözüne girmek için çalışıyordu.", "Kardeşine göz kulak olmalısın.", "Rüzgardan gözüme toz kaçtı.", "Artık gözden düştüğünü fark etti."], a: 2 },
-            { q: "Aşağıdaki metinlerden hangisi 'Bilgilendirici Metin' türüne örnektir?", o: ["Bir varmış bir yokmuş, uzaklarda bir köy varmış...", "Ali sabah erkenden kalktı, çantasını hazırladı...", "Erozyon, toprağın su ve rüzgar etkisiyle aşınmasıdır.", "Keloğlan, padişahın kızını güldürmeye çalışmış."], a: 2 },
-            { q: "'Burun' kelimesi hangi cümlede terim anlamıyla kullanılmıştır?", o: ["Burnu çok havada biridir.", "Geminin burnu limana çarptı.", "Her şeye burnunu sokar.", "Soğuktan burnum kızardı."], a: 1 } // Gemi terimi
+            { q: "Bir otoparkta araçlar yan yana dizilmiştir. Kırmızı araba, mavi arabanın hemen sağındadır. Yeşil araba, mavi arabanın solundadır. Siyah araba ise en sağdadır. Buna göre araçların soldan sağa sıralanışı nasıldır?", o: ["Yeşil - Mavi - Kırmızı - Siyah", "Mavi - Kırmızı - Yeşil - Siyah", "Kırmızı - Mavi - Yeşil - Siyah", "Siyah - Kırmızı - Mavi - Yeşil"], a: 0 },
+            { q: "Ahmet, 'Göz' kelimesini kullanarak bir cümle kuracaktır. Kuracağı cümlede 'göz' kelimesi, 'Çantadaki gözde kalemimi unuttum.' cümlesindeki anlamıyla (yan anlam) kullanılmalıdır. Hangi cümle buna uygundur?", o: ["Doktor, dedemin gözüne ilaç damlattı.", "Öğretmeninin gözüne girmek için çalıştı.", "Masanın kırık gözünü tamir ettim.", "Kardeşime göz kulak olmalısın."], a: 2 },
+            { q: "Tabloda 'Okul' kelimesinin eş anlamlısı '?' ile gösterilmiştir. '?' yerine ne gelmelidir?", o: ["Talebe", "Muallim", "Mektep", "Sınıf"], a: 2 },
+            { q: "'Damlaya damlaya göl olur' atasözünün ana fikrini işleyen bir metnin konusu ne olabilir?", o: ["Temizlik alışkanlığı", "Tasarruf ve birikim", "Su kaynaklarının korunması", "Arkadaşlık ilişkileri"], a: 1 },
+            { q: "Aşağıdaki cümlelerin hangisinde 'neden-sonuç' ilişkisi vardır?", o: ["Sabah erkenden kalkıp yüzünü yıkadı.", "Yağmur yağdığı için maç iptal edildi.", "Akşam ödevimi yaparsam oyun oynayabilirim.", "Marketten elma, armut ve muz aldık."], a: 1 }
         ],
         matematik: [
-            { q: "Rakamları birbirinden farklı, 4 basamaklı en küçük tek doğal sayının 3 katı kaçtır?", o: ["3069 (1023 x 3)", "3075 (1025 x 3)", "3003 (1001 x 3)", "3039 (1013 x 3)"], a: 0 },
-            { q: "Bir çıkarma işleminde Eksilen, Çıkan ve Fark'ın toplamı 600'dür. Çıkan sayı 120 ise Fark kaçtır?", o: ["300", "180", "120", "480"], a: 1 }, // Eksilen=300, 300-120=180
-            { q: "Ardışık 5 çift doğal sayının toplamı 140'tır. Bu sayıların en büyüğü kaçtır?", o: ["28", "30", "32", "34"], a: 2 }, // Ortanca 28. 24,26,28,30,32
-            { q: "Hangi sayının 4 katının 250 fazlası, 1250 eder?", o: ["250", "300", "1000", "2500"], a: 0 }, // 1250-250=1000, 1000/4=250
-            { q: "Bir trende 145 erkek, erkeklerden 35 eksik kadın ve kadınlardan 40 fazla çocuk vardır. Toplam yolcu sayısı kaçtır?", o: ["305", "405", "400", "290"], a: 1 } // E:145, K:110, Ç:150 => 405
+            { q: "Bir oyunda: Kırmızı Balon=1000 puan, Mavi Balon=100 puan, Sarı Balon=1 puan. 4 Kırmızı, 5 Mavi ve 3 Sarı balon vuran Ali kaç puan alır?", o: ["4530", "4503", "4053", "5403"], a: 1 },
+            { q: "Film 14.15'te başladı ve 1 saat 50 dakika sürdü. Film bittiğinde saat kaçtır?", o: ["15.05", "16.05", "15.65", "16.15"], a: 1 },
+            { q: "Bir kırtasiyeci 325 kalemi 5'erli paketler halinde satıyor. Bir paket 10 TL ise toplam kazanç kaç TL?", o: ["650 TL", "3250 TL", "65 TL", "750 TL"], a: 0 },
+            { q: "Örüntüdeki kuralı bozan sayı hangisidir? 4 - 8 - 12 - 15 - 20 - 24", o: ["16 (15 yerine gelmeli)", "14", "18", "13"], a: 0 },
+            { q: "Ailenin geliri 8500 TL. Kira 3000, Mutfak 2500, Faturalar 1200 TL. Kalan para biriktiriliyor. Ne kadar birikir?", o: ["1800 TL", "1700 TL", "2800 TL", "6700 TL"], a: 0 }
         ],
         fen: [
-            { q: "Aşağıdakilerden hangisi Dünya'nın Yıllık Hareketinin (Güneş etrafında dolanma) bir sonucudur?", o: ["Gece ve gündüzün oluşması", "Gün içinde gölge boylarının değişmesi", "Mevsimlerin oluşması", "Güneşin doğup batması"], a: 2 },
-            { q: "Besin içerikleriyle ilgili verilen bilgilerden hangisi YANLIŞTIR?", o: ["Proteinler yapıcı ve onarıcıdır.", "Sadece yağ tüketerek enerji ihtiyacımızı karşılamalıyız.", "Vitaminler düzenleyicidir.", "Su ve mineraller tüm besinlerde bulunur."], a: 1 },
-            { q: "Kayaçların ufalanmasıyla oluşan, içinde mineral ve organik madde barındıran örtüye ne denir?", o: ["Maden", "Fosil", "Toprak", "Magma"], a: 2 },
-            { q: "Obezite ile mücadele eden biri için hangisi DOĞRU bir davranıştır?", o: ["Öğün atlamak", "Sadece proteinle beslenmek", "Dengeli beslenip spor yapmak", "Sadece meyve yemek"], a: 2 },
-            { q: "Paketli gıdaların üzerinde bulunan 'TETT' kısaltmasının anlamı nedir?", o: ["Tavsiye Edilen Tüketim Tarihi", "Tamamen Ekşi Tatlı Tuzlu", "Türkiye Enerji Tüketim Toplamı", "Taze Elma Tane Tane"], a: 0 }
+            { q: "Dağın tepesinde balık fosili bulunması neyin kanıtıdır?", o: ["Balıkların uçabildiğinin", "O bölgenin eskiden deniz tabanı olduğunun", "Dağcıların balık taşıdığının", "Balıkların dağda yaşadığının"], a: 1 },
+            { q: "Beslenme çantasında: Sandviç, Ayran, Ceviz var. Hangi grup eksiktir?", o: ["Karbonhidrat", "Protein", "Vitamin (Meyve/Sebze)", "Yağ"], a: 2 },
+            { q: "Mıknatıs toplu iğneleri çekmiyor. Sebebi ne olabilir?", o: ["İğnelerin plastik olması", "Mıknatısın çok güçlü olması", "İğnelerin küçük olması", "Havanın sıcak olması"], a: 0 },
+            { q: "Suda batan/yüzen maddelerden hangisi YANLIŞ eşleştirilmiştir?", o: ["Demir Bilye - Batar", "Mantar Tıpa - Yüzer", "Tahta Kaşık - Batar", "Taş - Batar"], a: 2 },
+            { q: "Ayşe faturayı düşürmek için ısınıp çok yakan ampulü hangisiyle değiştirmelidir?", o: ["Daha büyük akkor ampul", "LED lamba", "Mum", "El feneri"], a: 1 }
         ],
         sosyal: [
-            { q: "Milli Mücadele olaylarının kronolojik sıralaması hangisinde DOĞRUDUR?", o: ["TBMM Açılışı - Samsun'a Çıkış - Cumhuriyet", "Samsun'a Çıkış - TBMM Açılışı - Cumhuriyet", "Cumhuriyet - TBMM Açılışı - Samsun'a Çıkış", "TBMM Açılışı - Cumhuriyet - Samsun'a Çıkış"], a: 1 },
-            { q: "Aşağıdakilerden hangisi kültürel ögelerin değişerek devam ettiğine (süreklilik) örnektir?", o: ["Bayramda el öpmek (Aynı)", "Atla gelin alma yerine arabayla gelin alma", "Nasreddin Hoca fıkralarının unutulması", "Kahvenin yanında su verilmesi (Aynı)"], a: 1 },
-            { q: "Sözlü tarih çalışması yaparken ilk aşama ne olmalıdır?", o: ["Görüşme yapılacak kişiyi belirlemek", "Soruları hazırlamak", "Görüşmeyi kaydetmek", "Bilgileri düzenlemek"], a: 0 },
-            { q: "'İlgi' ve 'Yetenek' farkı düşünüldüğünde hangisi bir YETENEK göstergesidir?", o: ["Futbol maçlarını izlemeyi sevmek", "Gitar çalanları beğenmek", "Duyduğu bir melodiyi hatasız çalabilmek", "Resim sergisine gitmek"], a: 2 },
-            { q: "Resmi kimlik belgemizde (Çipli Kimlik) hangisi BULUNMAZ?", o: ["T.C. Kimlik No", "Doğum Tarihi", "Okul Numarası", "Geçerlilik Tarihi"], a: 2 }
+            { q: "Krokinin köşesine konulan 'Kuzey Oku' ne işe yarar?", o: ["Süsleme", "Büyüklük gösterme", "Yönleri bulmayı sağlama", "Adını belirtme"], a: 2 },
+            { q: "Geçmişte duman/güvercin, bugün e-posta/görüntülü arama kullanılması neyi gösterir?", o: ["İnsanların haberleşmediğini", "Teknolojinin gelişmesiyle araçların değiştiğini", "Eskiden iletişimin hızlı olduğunu", "Güvercinlerin tükendiğini"], a: 1 },
+            { q: "Güney Cephesi'nde halkın (Kuvayi Milliye) kendi imkanlarıyla savaşması neyi gösterir?", o: ["Vatansever ve fedakar olduklarını", "Savaştan kaçtıklarını", "İşbirliği yaptıklarını", "Silah bilmediklerini"], a: 0 },
+            { q: "Alışverişte önce 'ekmek, süt' alıp, para kalırsa 'çikolata' almayı planlayan aile ne yapmıştır?", o: ["İsteklere öncelik vermiştir", "Bütçeyi aşmıştır", "Temel ihtiyaçlara öncelik vermiştir", "Tasarruf yapmamıştır"], a: 2 },
+            { q: "Hava durumu 'sağanak yağışlı' diyorsa yanına ne almalısın?", o: ["Güneş gözlüğü", "Şemsiye", "Güneş kremi", "Kısa kollu tişört"], a: 1 }
         ],
         ingilizce: [
-            { q: "Which sentence has a GRAMMAR MISTAKE?", o: ["She can play the piano.", "I am from Germany.", "He can rides a bike.", "They are Japanese."], a: 2 }, // rides olmamalı
-            { q: "Choose the correct answer: 'Twenty-four plus Fifteen equals...'", o: ["Thirty-five (35)", "Thirty-nine (39)", "Forty-nine (49)", "Twenty-nine (29)"], a: 1 }, // 24+15=39
-            { q: "'Fish can swim, but they can't fly.' cümlesinin Türkçe karşılığı nedir?", o: ["Balıklar uçabilir ama yüzemez.", "Balıklar yüzemez ve uçamaz.", "Balıklar yüzebilir ama uçamaz.", "Balıklar uçmayı sever."], a: 2 },
-            { q: "Which matching is INCORRECT?", o: ["Turkey - Turkish", "France - French", "USA - American", "Germany - Germany"], a: 3 }, // German olmalı
-            { q: "A: 'Is he from Italy?'\nB: 'No, he isn't. He is from Spain.'\nWhere is he from?", o: ["He is Italian.", "He is Spanish.", "He is German.", "He is Turkish."], a: 1 }
+            { q: "Tom points to a country with a 'Red and White' flag containing a 'Crescent and Star'. Which country is it?", o: ["Germany", "Turkey", "Japan", "USA"], a: 1 },
+            { q: "Table: Ali (Swim: YES, Fly: NO), Bird (Swim: NO, Fly: YES). Which sentence is TRUE?", o: ["Ali can fly.", "The bird can swim.", "Ali can't swim.", "The bird can fly."], a: 3 },
+            { q: "Which one is a 'classroom object'?", o: ["Pencil sharpener", "Bedroom", "Doctor", "Sunday"], a: 0 },
+            { q: "Math: 'Thirty plus Twenty equals...'", o: ["Forty (40)", "Fifty (50)", "Sixty (60)", "Ten (10)"], a: 1 },
+            { q: "The cat is under the table. (Kedi masanın altında). Hangi kelime 'altında' demektir?", o: ["on", "in", "under", "behind"], a: 2 }
         ],
         din: [
-            { q: "Aşağıdakilerden hangisi 'İmanın Şartları'ndan biri olup, 'İslam'ın Şartları' arasında yer ALMAZ?", o: ["Namaz kılmak", "Hacca gitmek", "Meleklere inanmak", "Zekat vermek"], a: 2 },
-            { q: "Sübhaneke duası namazda nerelerde okunur?", o: ["Sadece oturuşta", "Her rekatın başında", "Sadece 1. rekatta iftitah tekbirinden sonra", "Rükuda"], a: 2 },
-            { q: "Bir işe başlarken 'Bismillahirrahmanirrahim' demek ne anlama gelir?", o: ["Allah büyüktür", "Allah'a şükürler olsun", "Allah'ın adıyla (başlarım)", "Allah korusun"], a: 2 },
-            { q: "Kelime-i Şehadet getirirken söylenen 'Eşhedü...' ifadesinin anlamı nedir?", o: ["Ben şahitlik ederim ki...", "Ben dua ederim ki...", "Ben isterim ki...", "Ben bilirim ki..."], a: 0 },
-            { q: "Peygamberlere inanmak imanın kaçıncı şartıdır?", o: ["Şartı yoktur", "İmanın 6 şartından biridir", "İslam'ın 5 şartından biridir", "Sünnettir"], a: 1 }
+            { q: "Hz. Muhammed'in namazda sırtına çıkan torunu için secdesini uzatması neyi gösterir?", o: ["Namazı sevdiğini", "Çocuklara merhametli olduğunu", "Torunlarının yaramazlığını", "Namazın uzunluğunu"], a: 1 },
+            { q: "Sübhaneke duası namazda ne zaman okunur?", o: ["En sonda", "Otururken", "Başlarken (İlk rekatta, ayakta)", "Secdede"], a: 2 },
+            { q: "'Komşusu açken tok yatan bizden değildir' hadisi neyi vurgular?", o: ["Yemek yemeyi", "Yardımlaşma ve dayanışmayı", "Erken yatmayı", "Konuşmamayı"], a: 1 },
+            { q: "İman esaslarının (Amentü) tespih taneleri gibi olması neyi anlatır?", o: ["Ayrılabileceğini", "İmanın bir bütün olduğunu", "Sevabı", "Sayısını"], a: 1 },
+            { q: "Manevi temizlik (kalp temizliği) örneği hangisidir?", o: ["El yıkamak", "Diş fırçalamak", "Dürüst olmak / Yalan söylememek", "Sokağı temizlemek"], a: 2 }
         ]
     };
 
-    let currentSubject = '';
-    let userAnswers = [];
     let currentQuestions = [];
+    let userAnswers = [];
     let questionIndex = 0;
 
     function startQuiz(subject) {
-        currentSubject = subject;
         currentQuestions = quizData[subject];
         userAnswers = new Array(currentQuestions.length).fill(null);
         questionIndex = 0;
@@ -387,18 +404,13 @@
         document.getElementById('home-screen').style.display = 'none';
         document.getElementById('quiz-screen').style.display = 'flex';
         
-        // Başlık ve renk ayarı
+        // Başlık güncelle
         const titles = {
             'turkce': 'TÜRKÇE', 'matematik': 'MATEMATİK', 'fen': 'FEN BİLİMLERİ',
             'sosyal': 'SOSYAL BİLGİLER', 'ingilizce': 'İNGİLİZCE', 'din': 'DİN KÜLTÜRÜ'
         };
-        const titleEl = document.getElementById('subject-title');
-        titleEl.textContent = titles[subject];
+        document.getElementById('subject-badge').textContent = titles[subject];
         
-        // Renk sınıfını temizle ve yenisini ekle
-        titleEl.className = `subject-title ${subject}`;
-        document.getElementById('q-total').textContent = currentQuestions.length;
-
         loadQuestion();
     }
 
@@ -415,7 +427,7 @@
         if (questionIndex === currentQuestions.length - 1) {
             nextBtn.textContent = "Sınavı Bitir 🏁";
         } else {
-            nextBtn.textContent = "Sonraki ➡️";
+            nextBtn.textContent = "Sonraki Soru ➡️";
         }
 
         qData.o.forEach((opt, index) => {
@@ -423,7 +435,6 @@
             btn.className = 'option-btn';
             btn.textContent = ["A) ", "B) ", "C) ", "D) "][index] + opt;
             
-            // Önceden seçilmişse işaretle
             if (userAnswers[questionIndex] === index) {
                 btn.classList.add('selected');
             }
@@ -433,16 +444,13 @@
         });
     }
 
-    function selectOption(selectedIndex, btnElement) {
-        // Diğerlerinden seçimi kaldır
-        const options = document.querySelectorAll('.option-btn');
-        options.forEach(opt => opt.classList.remove('selected'));
-        
-        // Seçileni işaretle
+    function selectOption(index, btnElement) {
+        // Hepsinden kaldır
+        document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+        // Seçilene ekle
         btnElement.classList.add('selected');
-        
         // Kaydet
-        userAnswers[questionIndex] = selectedIndex;
+        userAnswers[questionIndex] = index;
     }
 
     function nextQuestion() {
@@ -471,15 +479,16 @@
         if (correctCount === 5) {
             title.textContent = "MÜKEMMEL! 🏆";
             title.style.color = "#10B981";
-            msg.textContent = "Zor soruların hepsini bildin. Harikasın!";
+            msg.textContent = "Yeni nesil soruların efendisisin!";
+            createConfetti();
         } else if (correctCount >= 3) {
-            title.textContent = "GÜZEL 👏";
+            title.textContent = "GÜZEL! 👏";
             title.style.color = "#F59E0B";
-            msg.textContent = "İyi iş çıkardın, ama biraz daha dikkatli olabilirsin.";
+            msg.textContent = "Mantık sorularına alışıyorsun.";
         } else {
-            title.textContent = "TEKRAR ET 📚";
+            title.textContent = "PES ETME! 💪";
             title.style.color = "#EF4444";
-            msg.textContent = "Bu konulara tekrar çalışmalısın. Pes etmek yok!";
+            msg.textContent = "Biraz daha pratikle halledeceksin.";
         }
     }
 
@@ -487,6 +496,19 @@
         document.getElementById('quiz-screen').style.display = 'none';
         document.getElementById('result-screen').style.display = 'none';
         document.getElementById('home-screen').style.display = 'flex';
+    }
+
+    function createConfetti() {
+        const colors = ['#6366F1', '#EC4899', '#F59E0B', '#10B981'];
+        for(let i=0; i<60; i++) {
+            const conf = document.createElement('div');
+            conf.className = 'confetti';
+            conf.style.left = Math.random() * 100 + 'vw';
+            conf.style.animationDuration = Math.random() * 2 + 2 + 's';
+            conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            document.body.appendChild(conf);
+            setTimeout(() => conf.remove(), 4000);
+        }
     }
 </script>
 
