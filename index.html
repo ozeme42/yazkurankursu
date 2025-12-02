@@ -3,95 +3,590 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yaz Kuran Kursu - Ana Sayfa</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>4. Sınıf Süper Deneme Sınavı</title>
     <style>
-        /* Inter font import */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+
+        :root {
+            --primary: #4F46E5;
+            --secondary: #10B981;
+            --accent: #F59E0B;
+            --danger: #EF4444;
+            --background: #F3F4F6;
+            --card-bg: #FFFFFF;
+            --text: #1F2937;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--background);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text);
+            user-select: none;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 800px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 20px;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* --- ANA MENÜ --- */
+        #home-screen {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%;
+            flex-grow: 1;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        p.subtitle {
+            font-size: 1.2rem;
+            color: #6B7280;
+            margin-bottom: 30px;
+        }
+
+        .subject-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            padding: 10px;
+        }
+
+        .subject-card {
+            background: white;
+            border: 2px solid #E5E7EB;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 700;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .subject-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+        }
+
+        .turkce { border-color: #EF4444; color: #EF4444; }
+        .matematik { border-color: #3B82F6; color: #3B82F6; }
+        .fen { border-color: #10B981; color: #10B981; }
+        .sosyal { border-color: #F59E0B; color: #F59E0B; }
+        .ingilizce { border-color: #8B5CF6; color: #8B5CF6; }
+        .din { border-color: #06B6D4; color: #06B6D4; }
+
+        .subject-card:active { transform: scale(0.98); }
+
+        /* --- SINAV EKRANI --- */
+        #quiz-screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #F3F4F6;
+            margin-bottom: 20px;
+        }
+
+        .badge {
+            background: var(--primary);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 2px solid #E5E7EB;
+            padding: 15px 20px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Nunito', sans-serif;
+            position: relative;
+        }
+
+        .option-btn:hover {
+            background: #F9FAFB;
+            border-color: var(--primary);
+        }
+
+        /* SEÇİLEN ŞIK TARZI (NÖTR - MAVİ) */
+        .option-btn.selected {
+            background-color: #EEF2FF; /* Çok açık mavi */
+            border-color: var(--primary);
+            color: var(--primary);
+            font-weight: 800;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+        }
+
+        .controls {
+            margin-top: auto;
+            display: flex;
+            justify-content: flex-end;
+            padding-top: 20px;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(79, 70, 229, 0.3);
+            transition: transform 0.2s;
+        }
+
+        .btn:active { transform: scale(0.95); }
+        .btn-secondary { background: #6B7280; margin-right: 10px; }
+        
+        .btn:disabled {
+            background: #D1D5DB;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* --- SONUÇ EKRANI --- */
+        #result-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.4);
+        }
+
+        .feedback-text {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(720deg); }
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8rem; }
+            .question-text { font-size: 1.1rem; }
+            .container { padding: 15px; height: 100vh; border-radius: 0; }
         }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-4">
-    <div class="bg-gray-800 rounded-2xl shadow-xl p-8 w-full max-w-2xl text-center flex flex-col items-center">
-        <h1 class="text-4xl font-bold text-blue-400 mb-8 rounded-lg bg-gray-900 p-4 shadow-md w-full">
-            Yaz Kuran Kursu
-        </h1>
+<body>
 
-        <p class="text-xl text-gray-200 mb-10">
-            Öğrenmek istediğin konuyu seçerek başlayabilirsin.
-        </p>
+<div class="container">
+    <!-- ANA MENÜ -->
+    <div id="home-screen">
+        <h1>🚀 Sınav Modu</h1>
+        <p class="subtitle">Başarılar! Başlamak için ders seç.</p>
+        <div class="subject-grid">
+            <div class="subject-card turkce" onclick="startQuiz('turkce')">📚 Türkçe<br>(25 Soru)</div>
+            <div class="subject-card matematik" onclick="startQuiz('matematik')">🧮 Matematik<br>(25 Soru)</div>
+            <div class="subject-card fen" onclick="startQuiz('fen')">🧪 Fen Bilimleri<br>(25 Soru)</div>
+            <div class="subject-card sosyal" onclick="startQuiz('sosyal')">🌍 Sosyal Bilgiler<br>(25 Soru)</div>
+            <div class="subject-card ingilizce" onclick="startQuiz('ingilizce')">🇬🇧 İngilizce<br>(20 Soru)</div>
+            <div class="subject-card din" onclick="startQuiz('din')">🕌 Din Kültürü<br>(20 Soru)</div>
+        </div>
+    </div>
 
-        <!-- Her bir ders bloğu için ana konteyner - Şimdi 2 sütunlu düzen -->
-        <!-- Responsive sınıflar: küçük ekranlarda 1, orta ve büyük ekranlarda 2 sütun -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
-
-            <!-- İnanç Konuları Bloğu -->
-            <div class="bg-gray-700 p-6 rounded-xl shadow-lg flex flex-col space-y-4">
-                <h2 class="text-3xl font-bold text-blue-300 mb-4">İnanç Konuları</h2>
-                <a href="inanc.html" class="block">
-                    <button class="w-full px-8 py-4 bg-blue-600 text-white font-semibold rounded-full shadow-lg hover:bg-blue-700 transition duration-300 ease-in-out transform hover:scale-105 text-2xl">
-                        İnanç
-                    </button>
-                </a>
-                <a href="inace.html" class="block">
-                    <button class="w-full px-8 py-4 bg-blue-500 text-white font-semibold rounded-full shadow-lg hover:bg-blue-600 transition duration-300 ease-in-out transform hover:scale-105 text-lg">
-                        İnanç Etkinlikleri
-                    </button>
-                </a>
-            </div>
-
-            <!-- İbadet Konuları Bloğu -->
-            <div class="bg-gray-700 p-6 rounded-xl shadow-lg flex flex-col space-y-4">
-                <h2 class="text-3xl font-bold text-purple-300 mb-4">İbadet Konuları</h2>
-                <a href="ibadet.html" class="block">
-                    <button class="w-full px-8 py-4 bg-purple-600 text-white font-semibold rounded-full shadow-lg hover:bg-purple-700 transition duration-300 ease-in-out transform hover:scale-105 text-2xl">
-                        İbadet
-                    </button>
-                </a>
-                <a href="ibadete.html" class="block">
-                    <button class="w-full px-8 py-4 bg-purple-500 text-white font-semibold rounded-full shadow-lg hover:bg-purple-600 transition duration-300 ease-in-out transform hover:scale-105 text-lg">
-                        İbadet Etkinlikleri
-                    </button>
-                </a>
-            </div>
-
-            <!-- Siyer Konuları Bloğu -->
-            <div class="bg-gray-700 p-6 rounded-xl shadow-lg flex flex-col space-y-4">
-                <h2 class="text-3xl font-bold text-green-300 mb-4">Siyer Konuları</h2>
-                <a href="siyer.html" class="block">
-                    <button class="w-full px-8 py-4 bg-green-600 text-white font-semibold rounded-full shadow-lg hover:bg-green-700 transition duration-300 ease-in-out transform hover:scale-105 text-2xl">
-                        Siyer
-                    </button>
-                </a>
-                <a href="siyere.html" class="block">
-                    <button class="w-full px-8 py-4 bg-green-500 text-white font-semibold rounded-full shadow-lg hover:bg-green-600 transition duration-300 ease-in-out transform hover:scale-105 text-lg">
-                        Siyer Etkinlikleri
-                    </button>
-                </a>
-            </div>
-
-            <!-- Ahlak Konuları Bloğu -->
-            <div class="bg-gray-700 p-6 rounded-xl shadow-lg flex flex-col space-y-4">
-                <h2 class="text-3xl font-bold text-yellow-300 mb-4">Ahlak Konuları</h2>
-                <a href="ahlak.html" class="block">
-                    <button class="w-full px-8 py-4 bg-yellow-600 text-white font-semibold rounded-full shadow-lg hover:bg-yellow-700 transition duration-300 ease-in-out transform hover:scale-105 text-2xl">
-                        Ahlak
-                    </button>
-                </a>
-                <a href="ahlake.html" class="block">
-                    <button class="w-full px-8 py-4 bg-yellow-500 text-white font-semibold rounded-full shadow-lg hover:bg-yellow-600 transition duration-300 ease-in-out transform hover:scale-105 text-lg">
-                        Ahlak Etkinlikleri
-                    </button>
-                </a>
-            </div>
+    <!-- SINAV EKRANI -->
+    <div id="quiz-screen">
+        <div class="quiz-header">
+            <span class="badge" id="subject-badge">DERS ADI</span>
+            <span style="font-weight: bold; color: #6B7280;" id="question-counter">1 / 25</span>
+        </div>
+        
+        <div class="question-text" id="question-text">
+            Soru buraya gelecek...
         </div>
 
-        <p class="text-sm text-gray-400 mt-12">
-            Bu dijital kurs, dini bilgileri eğlenceli ve etkileşimli bir şekilde öğrenmen için tasarlandı.
-        </p>
+        <div class="options-grid" id="options-container">
+            <!-- Şıklar -->
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-secondary" onclick="goHome()">Çıkış</button>
+            <button class="btn" id="next-btn" onclick="nextQuestion()" disabled>Sonraki Soru ➡️</button>
+        </div>
     </div>
+
+    <!-- SONUÇ EKRANI -->
+    <div id="result-screen">
+        <h2>Sınav Tamamlandı!</h2>
+        <div class="score-circle" id="final-score">0</div>
+        <p class="feedback-text" id="feedback-msg">Harika iş çıkardın!</p>
+        <button class="btn" onclick="goHome()">Ana Menüye Dön</button>
+    </div>
+</div>
+
+<script>
+    // --- SORU HAVUZU ---
+    const quizData = {
+        turkce: [
+            { q: "\"Çantamdaki kitaplar çok ağır geldiği için taşıyamadım.\" cümlesindeki \"ağır\" sözcüğünün anlamı nedir?", o: ["Mecaz Anlam", "Gerçek Anlam", "Terim Anlam", "Zıt Anlam"], a: 1 },
+            { q: "Aşağıdaki cümlelerin hangisinde terim anlamlı bir sözcük kullanılmıştır?", o: ["Sabah erkenden uyanıp yüzünü yıkadı.", "Hakem oyuncuya penaltı düdüğünü çaldı.", "Arkadaşımın kalbini kırdığım için üzgünüm.", "Bahçedeki çiçekler mis gibi kokuyordu."], a: 1 },
+            { q: "\"Bu işi başarmak için çok ter döktü.\" cümlesindeki altı çizili ifadenin anlamı nedir?", o: ["Hava sıcak olduğu için terlemek", "Koşu sporu yapmak", "Çok emek harcamak (Mecaz)", "Vücut ısısının artması"], a: 2 },
+            { q: "Hangisinde \"yanmak\" kelimesi mecaz anlamda kullanılmıştır?", o: ["Sobadaki odunlar yanıyor.", "Biletlerimizi almazsak yanar.", "Güneşten kollarım yandı.", "Ocakta yemek yandı."], a: 1 },
+            { q: "\"Kara\" kelimesi hangisinde \"Toprak parçası\" anlamındadır?", o: ["Kara haber tez duyulur.", "Gemi karaya yanaştı.", "Gözüne kara gözlük taktı.", "Kara gün dostu."], a: 1 },
+            { q: "\"Öğretmen, ödevini yapmayan Ali'ye çok sinirlendi.\" durumunu anlatan deyim hangisidir?", o: ["Etekleri zil çalmak", "Gözden düşmek", "Küplere binmek", "Ağzı kulaklarına varmak"], a: 2 },
+            { q: "\"Damla damla göl olur.\" atasözünün konusu nedir?", o: ["Temizlik", "Tasarruf ve birikim", "Dostluk", "Çalışkanlık"], a: 1 },
+            { q: "Hangi deyim \"çok sevinmek\" anlamındadır?", o: ["Etekleri tutuşmak", "Ağzı açık kalmak", "Etekleri zil çalmak", "İçi içine sığmamak"], a: 2 },
+            { q: "Bir metinde kışın kuşlara yem vermekten bahsediliyorsa metnin konusu nedir?", o: ["Kış mevsimi", "Kar yağışı", "Sokak hayvanlarına yardım", "Ekmek yapımı"], a: 2 },
+            { q: "Yazar kuşlara yem vermemizi istiyorsa bizden beklenen davranış nedir?", o: ["Kar topu oynamak", "Kuşları kafese koymak", "Kuşlar için yiyecek bırakmak", "Dışarı çıkmamak"], a: 2 },
+            { q: "\"İstasyon\" kelimesi uzay bağlamında ne anlama gelir?", o: ["Tren durağı", "Uzay araştırma üssü", "Benzinlik", "Otobüs durağı"], a: 1 },
+            { q: "Ressamın kullandığı \"tuval\" nedir?", o: ["Resim yapılan yüzey", "Boya kutusu", "Sergi alanı", "Kalem"], a: 0 },
+            { q: "Hangisinde sebep-sonuç ilişkisi vardır?", o: ["Yarın sinemaya gideceğiz.", "Çok çalıştığı için yüksek not aldı.", "Elmayı severim.", "Okula servisle gidiyorum."], a: 1 },
+            { q: "Elinde büyüteçle tırtıl inceleyen çocuğun görsel başlığı ne olabilir?", o: ["Müzik Dersi", "Küçük Kaşif Doğada", "Trafik Kuralları", "Alışveriş"], a: 1 },
+            { q: "\"Bir varmış bir yokmuş...\" diye başlayan metin türü nedir?", o: ["Masal", "Haber", "Şiir", "Mektup"], a: 0 },
+            { q: "23 Nisan'ı anlatan metin ne türdür?", o: ["Hikaye edici", "Bilgilendirici", "Şiir", "Masal"], a: 1 },
+            { q: "Hangisi tasarruf ile ilgili DEĞİLDİR?", o: ["Musluğu tamir etmek", "Lambayı kapatmak", "Diş fırçalarken suyu açık bırakmak", "Kumbara kullanmak"], a: 2 },
+            { q: "Kütüphane formunda imza bölümüne ne yapılır?", o: ["Kendi imzamızı atarız", "Boş bırakırız", "Tarih atarız", "Velimizin adını yazarız"], a: 0 },
+            { q: "Hangi tarih yazımı doğrudur?", o: ["29 ekim 1923", "29.Ekim.1923", "29/10/1923", "29-10/1923"], a: 2 },
+            { q: "Adres kısmına hangisi yazılmaz?", o: ["Mahalle", "Sokak", "En sevdiğimiz yemek", "İlçe"], a: 2 },
+             { q: "Sunum yapan arkadaşımızı dinlerken hangisi yanlıştır?", o: ["Göz teması kurmak", "Sözünü kesmemek", "Soruyu en son sormak", "Yanımızdakiyle konuşmak"], a: 3 },
+            { q: "Hazırlıksız konuşmada neye dikkat edilir?", o: ["Konu dışına çıkmaya", "İşitilebilir sesle konuşmaya", "Hızlı konuşmaya", "Yere bakmaya"], a: 1 },
+            { q: "İkna etmek için hangisi etkilidir?", o: ["Destekleyici ifadeler kullanmak", "Bağırmak", "Konuyu değiştirmek", "Küsmek"], a: 0 },
+            { q: "29 Ekim Cumhuriyet Bayramı hangi mevsimdedir?", o: ["Yaz", "Sonbahar", "Kış", "İlkbahar"], a: 1 },
+            { q: "Şiir yazan kişiye ne denir?", o: ["Yazar", "Şair", "Ressam", "Ozan"], a: 1 }
+        ],
+        matematik: [
+            { q: "\"Yüz bin iki yüz beş\" sayısının rakamla yazılışı hangisidir?", o: ["100 205", "102 005", "100 025", "120 005"], a: 0 },
+            { q: "843.512 sayısının binler bölüğünde hangi sayı vardır?", o: ["512", "843", "435", "84"], a: 1 },
+            { q: "6 basamaklı en küçük sayı ile 4 basamaklı en büyük sayının farkı kaçtır?", o: ["1", "90 001", "99 000", "100 000"], a: 1 },
+            { q: "54.276 sayısındaki 4 rakamının basamak değeri kaçtır?", o: ["40", "400", "4 000", "40 000"], a: 2 },
+            { q: "400.000 + 50.000 + 3.000 + 200 + 8 işleminin sonucu nedir?", o: ["453.208", "450.328", "405.328", "453.280"], a: 0 },
+            { q: "2000'den başlayıp biner sayarken 6. sayı hangisidir?", o: ["6000", "7000", "8000", "5000"], a: 1 },
+            { q: "4250 + 3145 işleminin sonucu kaçtır?", o: ["7395", "7295", "7385", "7495"], a: 0 },
+            { q: "2600 + 700 işlemini zihinden nasıl yaparız?", o: ["Üzerine 100'er 7 defa sayarız", "10'ar sayarız", "2000 ile toplarız", "Çarparız"], a: 0 },
+            { q: "3428 + 2561 işlemini en yakın yüzlüğe yuvarlayarak tahmin edersek sonuç kaç olur?", o: ["5900", "6000", "6100", "5800"], a: 1 },
+            { q: "Hangi toplama yanlıştır?", o: ["3000+200=3200", "5400+600=6000", "1250+300=1650", "4100+900=5000"], a: 2 },
+            { q: "Toplama işleminde sayıların yerinin değişmesi sonucu etkiler mi?", o: ["Artar", "Azalır", "Değişmez", "İşlem yapılmaz"], a: 2 },
+            { q: "8456 - 3214 işleminin sonucu kaçtır?", o: ["5232", "5242", "5142", "5222"], a: 1 },
+            { q: "Eksilen 7500, Fark 2500 ise Çıkan kaçtır?", o: ["4000", "5000", "10000", "9000"], a: 1 },
+            { q: "680 - 40 işlemini zihinden yapmanın kolay yolu nedir?", o: ["Yüzlükleri çıkarmak", "Onlukları çıkarmak", "Birler basamağını toplamak", "Yuvarlamak"], a: 1 },
+            { q: "562 - 400 zihinden kaçtır?", o: ["162", "262", "962", "152"], a: 0 },
+            { q: "A + 1200 = 4500 ise A kaçtır?", o: ["3200", "3300", "5700", "2300"], a: 1 },
+            { q: "15 x 8 = 120 ise 8 x 15 kaçtır?", o: ["100", "110", "120", "130"], a: 2 },
+            { q: "24 x 5 x 3 = 3 x A x 24 ise A kaçtır?", o: ["3", "5", "24", "15"], a: 1 },
+            { q: "12.450 erkek, 8.230 kadın seyirci varsa toplam kaç seyirci vardır?", o: ["20 680", "20 580", "19 680", "21 680"], a: 0 },
+            { q: "250 TL vardı. 150 TL baba, 100 TL anne verdi. 75 TL harcadı. Kaç TL kaldı?", o: ["425", "500", "325", "450"], a: 0 },
+            { q: "4500 ekmek üretildi. 2100 ve 1200 satıldı. Geriye kaç kaldı?", o: ["1200", "1100", "3300", "1300"], a: 0 },
+            { q: "Ali 9 yaşında. Ablası 2 katından 3 fazla. Toplam yaş kaç?", o: ["21", "27", "30", "33"], a: 2 },
+            { q: "1. hafta 12.500, 2. hafta 3.500 fazla kazandı. Toplam kazanç?", o: ["16 000", "28 500", "25 000", "29 000"], a: 1 },
+            { q: "Rakamları farklı 4 basamaklı en büyük sayı ile 3 basamaklı en küçük sayının toplamı?", o: ["9976", "9989", "10000", "9876"], a: 0 },
+            { q: "Trende 450 yolcu vardı. 120 indi, 85 bindi. Son durum?", o: ["330", "535", "415", "405"], a: 2 }
+        ],
+        fen: [
+            { q: "Yer kabuğunu oluşturan sert taş kütlelerine ne denir?", o: ["Maden", "Kayaç", "Fosil", "Toprak"], a: 1 },
+            { q: "Ekonomik değeri olan kayaçlara ne denir?", o: ["Taş", "Çakıl", "Maden", "Kum"], a: 2 },
+            { q: "Hangisi ülkemizde çıkarılan önemli bir madendir?", o: ["Bor", "Çakıl", "Tuğla", "Cam"], a: 0 },
+            { q: "Altın, gümüş, bakır neye örnektir?", o: ["Besin", "Fosil", "Maden", "Kayaç"], a: 2 },
+            { q: "Kayaçların farklı renkte olmasının sebebi nedir?", o: ["Güneş", "Mineraller", "Toprak", "Yağmur"], a: 1 },
+            { q: "Dünya'nın kendi etrafında tam turu ne kadar sürer?", o: ["1 Yıl", "1 Hafta", "24 Saat", "1 Ay"], a: 2 },
+            { q: "Dünya'nın kendi etrafında dönmesinin sonucu nedir?", o: ["Mevsimler", "Gece-Gündüz", "Yıl", "Meyveler"], a: 1 },
+            { q: "Dünya'nın Güneş etrafında dolanması ne kadar sürer?", o: ["24 Saat", "365 Gün 6 Saat", "30 Gün", "12 Saat"], a: 1 },
+            { q: "Gölge boylarının gün içinde değişmesinin sebebi nedir?", o: ["Dolanma hareketi", "Ay", "Dünya'nın kendi etrafında dönmesi", "Mevsimler"], a: 2 },
+            { q: "Yıllık hareketin sonucu hangisidir?", o: ["Gece-Gündüz", "Sıcaklık farkı", "Mevsimler", "Güneşin doğması"], a: 2 },
+            { q: "Vücudun öncelikli enerji kaynağı hangisidir?", o: ["Protein", "Karbonhidrat", "Vitamin", "Su"], a: 1 },
+            { q: "Yapıcı ve onarıcı besin grubu hangisidir?", o: ["Protein", "Yağ", "Karbonhidrat", "Mineral"], a: 0 },
+            { q: "Düzenleyici olan besin grubu hangisidir?", o: ["Karbonhidrat", "Yağ", "Vitamin", "Ekmek"], a: 2 },
+            { q: "Hangisi protein bakımından zengindir?", o: ["Elma", "Ekmek", "Yumurta", "Zeytin"], a: 2 },
+            { q: "Makarna ve ekmekte en çok ne bulunur?", o: ["Protein", "Karbonhidrat", "Vitamin", "Yağ"], a: 1 },
+            { q: "Aç kaldığımızda ikinci enerji kaynağı nedir?", o: ["Su", "Mineral", "Yağ", "Vitamin"], a: 2 },
+            { q: "Su ve mineraller nerede bulunur?", o: ["Sadece içecek", "Bütün besinlerde", "Meyvelerde", "Sebzelerde"], a: 1 },
+            { q: "Vücudumuzun %70'i nedir?", o: ["Kemik", "Yağ", "Kas", "Su"], a: 3 },
+            { q: "Dengeli beslenme nedir?", o: ["Her şeyi yemek", "Sadece sebze yemek", "İhtiyaç kadar ve düzenli yemek", "Sadece makarna yemek"], a: 2 },
+            { q: "Paketli gıdada ilk neye bakılır?", o: ["Reklam", "Renk", "Son Tüketim Tarihi", "Şekil"], a: 2 },
+            { q: "Besinlerin tazeliği neden önemlidir?", o: ["Pahalı olması", "Sağlığımız için", "Güzel görünmesi", "Market için"], a: 1 },
+            { q: "Obezite olan birine ne önerilmez?", o: ["Spor", "Dengeli beslenme", "Cips ve kola", "Sebze yemek"], a: 2 },
+            { q: "Hangi eşleştirme yanlıştır?", o: ["Et-Protein", "Ekmek-Karbonhidrat", "Tereyağı-Yağ", "Portakal-Yağ"], a: 3 },
+            { q: "Madenler nerede kullanılır?", o: ["Sadece süs", "Teknolojide hammadde", "Yeri yok", "Yakacak"], a: 1 },
+            { q: "Hangisi sağlıksızdır?", o: ["Kahvaltı yapmak", "Ayran içmek", "Sadece hamburger yemek", "Meyve yıkamak"], a: 2 }
+        ],
+        sosyal: [
+            { q: "Vatandaşlara verilen resmi belge nedir?", o: ["Pasaport", "Ehliyet", "Kimlik Kartı", "Öğrenci Belgesi"], a: 2 },
+            { q: "Yeni kimlikte hangisi yer almaz?", o: ["TC No", "Anne Adı", "Okul Adı", "Doğum Tarihi"], a: 2 },
+            { q: "Biri resim, biri futbol seviyorsa bu nedir?", o: ["Bireysel farklılık", "Anlaşmazlık", "Kural hatası", "Benzerlik"], a: 0 },
+            { q: "Parmak izinin farklı olması neyi gösterir?", o: ["Fiziksel benzerliği", "Kişinin biricik olduğunu", "Akrabalığı", "Gereksizliği"], a: 1 },
+            { q: "Hangisi bir ilgi alanıdır?", o: ["Beslenmek", "Barınmak", "Gitar çalmak", "Uyumak"], a: 2 },
+            { q: "Farklılıklara saygı duyan biri ne yapmaz?", o: ["Dinler", "Alay eder", "Kabul eder", "Yardım eder"], a: 1 },
+            { q: "Geçmişi büyüklerden dinlemeye ne denir?", o: ["Yazılı Tarih", "Sözlü Tarih", "Resmi Tarih", "Coğrafya"], a: 1 },
+            { q: "Aile tarihi için hangisi kaynak olamaz?", o: ["Fotoğraf", "Madalya", "Yarınki gazete", "Çeyiz sandığı"], a: 2 },
+            { q: "Milli kültür yemeğimiz hangisidir?", o: ["Pizza", "Hamburger", "Mantı", "Suşi"], a: 2 },
+            { q: "Evdeki milli kültür ögesi hangisidir?", o: ["Mikrodalga", "El dokuması halı", "Plastik sandalye", "TV"], a: 1 },
+            { q: "Asker uğurlama neyin parçasıdır?", o: ["Teknoloji", "Gelenek görenek", "Eğitim", "Trafik"], a: 1 },
+            { q: "Eskiden cirit, şimdi futbol oynanması neyi gösterir?", o: ["Kültürel değişimi", "Düğün yapılmadığını", "Kültürün değişmediğini", "Yasaklandığını"], a: 0 },
+            { q: "Geleneksel çocuk oyunu hangisidir?", o: ["Bilgisayar", "Saklambaç", "Sanal gerçeklik", "Tablet"], a: 1 },
+            { q: "Geleneksel oyunlar neden azaldı?", o: ["Çocuklar sevmiyor", "Teknoloji ve şehirleşme", "Kurallar zor", "Tatil yok"], a: 1 },
+            { q: "Eskiden ve şimdi oynanan oyun hangisidir?", o: ["Yakar Top", "Playstation", "Atari", "Mobil oyun"], a: 0 },
+            { q: "Oyunlar ne kazandırır?", o: ["Sadece kas", "Yalnızlık", "Arkadaşlık ve işbirliği", "Fatura"], a: 2 },
+            { q: "Milli Mücadele'nin başlangıcı?", o: ["TBMM", "Samsun'a çıkış", "Cumhuriyet", "İşgal"], a: 1 },
+            { q: "Milli Mücadele'de en önemli özellik?", o: ["Zenginlik", "Birlik ve beraberlik", "Teknoloji", "Karamsarlık"], a: 1 },
+            { q: "Maraş'ta ilk kurşunu kim attı?", o: ["Sütçü İmam", "Şahin Bey", "Hasan Tahsin", "Ali Saip"], a: 0 },
+            { q: "İzmir'de ilk kurşunu atan gazeteci?", o: ["Kazım Karabekir", "Hasan Tahsin", "Fevzi Çakmak", "İsmet İnönü"], a: 1 },
+            { q: "Bebeği yerine cephaneyi örten kahraman?", o: ["Nene Hatun", "Halide Edip", "Şerife Bacı", "Kara Fatma"], a: 2 },
+            { q: "Doğu Cephesi komutanı kimdir?", o: ["Atatürk", "Kazım Karabekir", "İsmet İnönü", "Rauf Orbay"], a: 1 },
+            { q: "23 Nisan 1920'de ne açıldı?", o: ["TDK", "TBMM", "Anıtkabir", "TTK"], a: 1 },
+            { q: "Zafer Bayramı hangi gündür?", o: ["19 Mayıs", "23 Nisan", "30 Ağustos", "29 Ekim"], a: 2 },
+            { q: "Kurtuluş gününü neden kutlarız?", o: ["Tatil için", "Atalarımızı anmak için", "Eğlence için", "Okuldan kaçmak için"], a: 1 }
+        ],
+        ingilizce: [
+            { q: "I am from Turkey. I am ................. .", o: ["English", "Turkish", "German", "French"], a: 1 },
+            { q: "Which match is WRONG?", o: ["Germany - German", "Italy - Italian", "France - French", "Britain - Japan"], a: 3 },
+            { q: "Where are you from?", o: ["I am ten.", "My name is Ali.", "I am from Pakistan.", "I like football."], a: 2 },
+            { q: "\"He is Japanese\" ne demektir?", o: ["O Japonya'dan.", "O Japon'dur.", "O Japonya'yı sever.", "O Japonca konuşamaz."], a: 1 },
+            { q: "Rusya bayrağı gören biri ne der?", o: ["I am from Russia.", "I am from USA.", "I am from Iran.", "I am from Iraq."], a: 0 },
+            { q: "I am from ...... . I am Iranian.", o: ["Iraq", "Iran", "Italy", "India"], a: 1 },
+            { q: "Are you British? Yes, .......", o: ["I am not.", "he is.", "I am.", "she is."], a: 2 },
+            { q: "USA - ............", o: ["American", "English", "Russian", "German"], a: 0 },
+            { q: "Twenty, thirty, forty, .......", o: ["Ten", "Fifty", "Five", "Fifteen"], a: 1 },
+            { q: "48 in English?", o: ["Forty-eight", "Four-eight", "Fifty-eight", "Thirty-eight"], a: 0 },
+            { q: "Twelve + Three = ?", o: ["Thirteen", "Fourteen", "Fifteen", "Sixteen"], a: 2 },
+            { q: "Thirty-six sayısı hangisidir?", o: ["26", "36", "46", "16"], a: 1 },
+            { q: "Sıralama hangisinde doğrudur?", o: ["Ten-Twenty-Thirty", "Forty-Thirty-Twenty", "Ten-Five-One", "Fifty-Forty-Ten"], a: 0 },
+            { q: "There are ..... (22) students.", o: ["Twenty-two", "Twelve-two", "Two-twenty", "Twenty"], a: 0 },
+            { q: "Kuş uçabilir.", o: ["It can swim.", "It can fly.", "It can run.", "It can read."], a: 1 },
+            { q: "I .... play guitar(yes), but I .... play piano(no).", o: ["can / can", "can't / can't", "can / can't", "can't / can"], a: 2 },
+            { q: "Yüzen çocuk görseli?", o: ["He can dive.", "He can swim.", "He can fly.", "He can jump."], a: 1 },
+            { q: "Can you ride a bike? (Yes)", o: ["No I can't.", "Yes I do.", "Yes I can.", "No I am not."], a: 2 },
+            { q: "Mantıksız olan?", o: ["Fish-Swim", "Bird-Fly", "Monkey-Climb", "Snake-Walk"], a: 3 },
+            { q: "He is strong. He .... lift boxes.", o: ["can", "can't", "is", "are"], a: 0 }
+        ],
+        din: [
+            { q: "İşe başlarken ne denir?", o: ["Elhamdülillah", "Bismillahirrahmanirrahim", "Allahu Ekber", "Sübhanallah"], a: 1 },
+            { q: "Yemekten sonra ne denir?", o: ["Bismillah", "Elhamdülillah", "Maşallah", "İnşallah"], a: 1 },
+            { q: "Hastaya ne denir?", o: ["Allah şifa versin", "Bereket versin", "Rahmet eylesin", "Zihin açıklığı"], a: 0 },
+            { q: "Allah izin verirse?", o: ["Maşallah", "İnşallah", "Bismillah", "Sübhanallah"], a: 1 },
+            { q: "Nazardan korusun?", o: ["İnşallah", "Estağfurullah", "Maşallah", "Elhamdülillah"], a: 2 },
+            { q: "Sınava girene ne denir?", o: ["Şifa versin", "Zihin açıklığı versin", "Kabul etsin", "Korusun"], a: 1 },
+            { q: "Hangisi imanın şartı değildir?", o: ["Allah'a inanmak", "Meleklere inanmak", "Kurban kesmek", "Kitaplara inanmak"], a: 2 },
+            { q: "Peygamberlere inanmak?", o: ["Şartı yok", "İmanın şartı", "İslamın şartı", "Farz"], a: 1 },
+            { q: "Kitaplara inanmak hangi şart?", o: ["Melekler", "Kitaplar", "Ahiret", "Kader"], a: 1 },
+            { q: "Öldükten sonra dirilmek?", o: ["Ahiret", "Kader", "Peygamber", "Allah"], a: 0 },
+            { q: "Her şeyin Allah'tan olması?", o: ["Melek", "Kaza ve Kader", "Kitap", "Ahiret"], a: 1 },
+            { q: "İslam'ın şartı kaçtır?", o: ["3", "5", "6", "32"], a: 1 },
+            { q: "Kelime-i Şehadet?", o: ["Eşhedü...", "Sübhaneke", "Fatiha", "Kevser"], a: 0 },
+            { q: "Zenginlerin malından vermesi?", o: ["Namaz", "Oruç", "Zekat", "Hac"], a: 2 },
+            { q: "Ramazan ayı ibadeti?", o: ["Hac", "Oruç", "Kurban", "Zekat"], a: 1 },
+            { q: "Kabe'yi ziyaret?", o: ["Hac", "Namaz", "Oruç", "Zekat"], a: 0 },
+            { q: "Sübhaneke ne zaman okunur?", o: ["Rükuda", "Sonunda", "İlk rekatta ayakta", "Secdede"], a: 2 },
+            { q: "Ve celle senâük ne zaman okunur?", o: ["Sabah", "Bayram", "Cenaze", "Teravih"], a: 2 },
+            { q: "Sübhaneke'de olmayan?", o: ["Ve tebarek", "Ve teala", "Ve la ilahe", "Maliki yevmiddin"], a: 3 },
+            { q: "Sübhaneke anlamı?", o: ["Seni eksik sıfatlardan uzak tutarım", "İyilik ver", "Doğru yol", "Şeytandan sığınma"], a: 0 }
+        ]
+    };
+
+    let currentSubject = '';
+    let currentQuestions = [];
+    let questionIndex = 0;
+    
+    // Değişiklik: Kullanıcının cevaplarını tutan dizi
+    let userAnswers = [];
+
+    function startQuiz(subject) {
+        currentSubject = subject;
+        currentQuestions = quizData[subject];
+        questionIndex = 0;
+        
+        // Cevapları sıfırla (null ile doldur)
+        userAnswers = new Array(currentQuestions.length).fill(null);
+
+        document.getElementById('home-screen').style.display = 'none';
+        document.getElementById('quiz-screen').style.display = 'flex';
+        
+        const badge = document.getElementById('subject-badge');
+        badge.className = `badge ${subject}`;
+        const names = {
+            'turkce': 'TÜRKÇE', 'matematik': 'MATEMATİK', 'fen': 'FEN BİLİMLERİ',
+            'sosyal': 'SOSYAL BİLGİLER', 'ingilizce': 'İNGİLİZCE', 'din': 'DİN KÜLTÜRÜ'
+        };
+        badge.textContent = names[subject];
+
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const qData = currentQuestions[questionIndex];
+        
+        document.getElementById('question-counter').textContent = `${questionIndex + 1} / ${currentQuestions.length}`;
+        document.getElementById('question-text').textContent = qData.q;
+        
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        
+        const nextBtn = document.getElementById('next-btn');
+        // Yeni soruya geçince butonu pasif yap
+        nextBtn.disabled = true;
+        if (questionIndex === currentQuestions.length - 1) {
+            nextBtn.textContent = "Sınavı Bitir 🏁";
+        } else {
+            nextBtn.textContent = "Sonraki Soru ➡️";
+        }
+
+        qData.o.forEach((opt, index) => {
+            const btn = document.createElement('div');
+            btn.className = 'option-btn';
+            btn.textContent = ["A) ", "B) ", "C) ", "D) "][index] + opt;
+            
+            // Eğer daha önce cevaplandıysa (geri gelme durumu olursa diye) işaretli göster
+            if (userAnswers[questionIndex] === index) {
+                btn.classList.add('selected');
+                nextBtn.disabled = false;
+            }
+
+            btn.onclick = () => selectOption(index, btn);
+            container.appendChild(btn);
+        });
+    }
+
+    function selectOption(selectedIndex, btnElement) {
+        // Tüm seçeneklerden 'selected' sınıfını kaldır
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+
+        // Tıklanana ekle
+        btnElement.classList.add('selected');
+
+        // Cevabı kaydet
+        userAnswers[questionIndex] = selectedIndex;
+
+        // İlerleme butonunu aktif et
+        document.getElementById('next-btn').disabled = false;
+    }
+
+    function nextQuestion() {
+        questionIndex++;
+        if (questionIndex < currentQuestions.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        // Puan hesaplama burada yapılır
+        let correctCount = 0;
+        
+        currentQuestions.forEach((q, idx) => {
+            if (userAnswers[idx] === q.a) {
+                correctCount++;
+            }
+        });
+
+        document.getElementById('quiz-screen').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'flex';
+        
+        const finalScoreEl = document.getElementById('final-score');
+        finalScoreEl.textContent = correctCount;
+        
+        const msg = document.getElementById('feedback-msg');
+        const percentage = (correctCount / currentQuestions.length) * 100;
+
+        if (percentage >= 80) {
+            finalScoreEl.style.background = '#10B981';
+            msg.textContent = "Mükemmel! Çok Başarılısın! 🌟";
+            createConfetti();
+        } else if (percentage >= 50) {
+            finalScoreEl.style.background = '#F59E0B';
+            msg.textContent = "Güzel! Biraz daha çalışırsan harika olur. 👍";
+        } else {
+            finalScoreEl.style.background = '#EF4444';
+            msg.textContent = "Tekrar etmelisin. Pes etmek yok! 💪";
+        }
+    }
+
+    function goHome() {
+        document.getElementById('quiz-screen').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'none';
+        document.getElementById('home-screen').style.display = 'flex';
+    }
+
+    function createConfetti() {
+        for(let i=0; i<50; i++) {
+            const conf = document.createElement('div');
+            conf.className = 'confetti';
+            conf.style.left = Math.random() * 100 + 'vw';
+            conf.style.animationDuration = Math.random() * 2 + 2 + 's';
+            conf.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+            document.body.appendChild(conf);
+            setTimeout(() => conf.remove(), 4000);
+        }
+    }
+</script>
+
 </body>
 </html>
